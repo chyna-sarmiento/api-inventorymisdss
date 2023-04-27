@@ -1,0 +1,7 @@
+D:\Documents\Visual Studio Projects\api-inventorymisdss\api-inventorymisdss\obj\Debug\net7.0\api-inventorymisdss.csproj.AssemblyReference.cache
+D:\Documents\Visual Studio Projects\api-inventorymisdss\api-inventorymisdss\obj\Debug\net7.0\api-inventorymisdss.GeneratedMSBuildEditorConfig.editorconfig
+D:\Documents\Visual Studio Projects\api-inventorymisdss\api-inventorymisdss\obj\Debug\net7.0\api-inventorymisdss.AssemblyInfoInputs.cache
+D:\Documents\Visual Studio Projects\api-inventorymisdss\api-inventorymisdss\obj\Debug\net7.0\api-inventorymisdss.AssemblyInfo.cs
+D:\Documents\Visual Studio Projects\api-inventorymisdss\api-inventorymisdss\obj\Debug\net7.0\api-inventorymisdss.csproj.CoreCompileInputs.cache
+D:\Documents\Visual Studio Projects\api-inventorymisdss\api-inventorymisdss\obj\Debug\net7.0\api-inventorymisdss.MvcApplicationPartsAssemblyInfo.cs
+D:\Documents\Visual Studio Projects\api-inventorymisdss\api-inventorymisdss\obj\Debug\net7.0\api-inventorymisdss.MvcApplicationPartsAssemblyInfo.cache
