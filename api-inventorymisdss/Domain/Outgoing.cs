@@ -10,5 +10,12 @@
 
         public Product? Product { get; set; }
         public long ProductId { get; set; }
+        public string ProductName { get; set; }
+
+        public Outgoing(int quantity)
+        {
+            DateTimeOutgoing = DateTime.Now;
+            Quantity = quantity;
+        }   
     }
 }

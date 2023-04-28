@@ -15,19 +15,12 @@ namespace api_inventorymisdss.Repository
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Product>()
-                .HasKey(p => p.Id);
-
-            modelBuilder.Entity<Incoming>()
-                .HasOne(p => p.Product)
-                .WithMany()
-                .HasForeignKey(s => s.ProductId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .Property(p => p.Price)
+                .HasColumnType("decimal(18,2)");
 
             modelBuilder.Entity<Outgoing>()
-                .HasOne(p => p.Product)
-                .WithMany()
-                .HasForeignKey(s => s.ProductId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .Property(o => o.TotalPrice)
+                .HasColumnType("decimal(18,2)");
         }
     }
 }
