@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Documents\\Visual Studio Projects\\api-inventorymisdss\\api-inventorymisdss\\api-inventorymisdss.csproj": {}
+    "C:\\Users\\Julia\\source\\repos\\api-inventorymisdss\\api-inventorymisdss\\api-inventorymisdss.csproj": {}
   },
   "projects": {
-    "D:\\Documents\\Visual Studio Projects\\api-inventorymisdss\\api-inventorymisdss\\api-inventorymisdss.csproj": {
+    "C:\\Users\\Julia\\source\\repos\\api-inventorymisdss\\api-inventorymisdss\\api-inventorymisdss.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Documents\\Visual Studio Projects\\api-inventorymisdss\\api-inventorymisdss\\api-inventorymisdss.csproj",
+        "projectUniqueName": "C:\\Users\\Julia\\source\\repos\\api-inventorymisdss\\api-inventorymisdss\\api-inventorymisdss.csproj",
         "projectName": "api-inventorymisdss",
-        "projectPath": "D:\\Documents\\Visual Studio Projects\\api-inventorymisdss\\api-inventorymisdss\\api-inventorymisdss.csproj",
-        "packagesPath": "C:\\Users\\acer\\.nuget\\packages\\",
-        "outputPath": "D:\\Documents\\Visual Studio Projects\\api-inventorymisdss\\api-inventorymisdss\\obj\\",
+        "projectPath": "C:\\Users\\Julia\\source\\repos\\api-inventorymisdss\\api-inventorymisdss\\api-inventorymisdss.csproj",
+        "packagesPath": "C:\\Users\\Julia\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Julia\\source\\repos\\api-inventorymisdss\\api-inventorymisdss\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\acer\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Julia\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -52,6 +52,10 @@
               "target": "Package",
               "version": "[7.0.5, )"
             },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[7.0.5, )"
+            },
             "Microsoft.EntityFrameworkCore.Tools": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "suppressParent": "All",
@@ -82,7 +86,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.203\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.102\\RuntimeIdentifierGraph.json"
         }
       }
     }
