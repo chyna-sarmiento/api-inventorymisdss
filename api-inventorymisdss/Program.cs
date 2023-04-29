@@ -1,7 +1,5 @@
 ﻿using api_inventorymisdss.Repository;
 using Microsoft.EntityFrameworkCore;
-using api_inventorymisdss.Controllers;
-using api_inventorymisdss.ViewModels;
 
 var builder = WebApplication.CreateBuilder(args);
 IConfiguration Configuration = builder.Configuration;
@@ -29,9 +27,5 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
-
-app.MapProductEndpoints();
-
-app.MapIncomingEndpoints();
 
 app.Run();

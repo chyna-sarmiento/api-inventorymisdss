@@ -11,9 +11,9 @@ namespace api_inventorymisdss.Repository.EntityConfiguration
             builder.ToTable("Incoming", "Inventory");
             builder.HasKey(i => i.Id);
 
-            builder.HasOne(p => p.Product)
+            builder.HasOne(p => p.ProductList)
                 .WithMany()
-                .HasForeignKey(i => i.ProductId)
+                .HasForeignKey(i => i.IncomingProductId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

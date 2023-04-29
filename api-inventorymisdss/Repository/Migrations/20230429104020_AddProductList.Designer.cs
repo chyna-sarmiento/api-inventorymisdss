@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using api_inventorymisdss.Repository;
 
@@ -11,9 +12,11 @@ using api_inventorymisdss.Repository;
 namespace api_inventorymisdss.Repository.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20230429104020_AddProductList")]
+    partial class AddProductList
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -49,7 +52,7 @@ namespace api_inventorymisdss.Repository.Migrations
 
                     b.HasIndex("ProductListId");
 
-                    b.ToTable("Incomings", (string)null);
+                    b.ToTable("Incomings");
                 });
 
             modelBuilder.Entity("api_inventorymisdss.Domain.Outgoing", b =>
@@ -82,7 +85,7 @@ namespace api_inventorymisdss.Repository.Migrations
 
                     b.HasIndex("ProductListId");
 
-                    b.ToTable("Outgoings", (string)null);
+                    b.ToTable("Outgoings");
                 });
 
             modelBuilder.Entity("api_inventorymisdss.Domain.Product", b =>
@@ -119,7 +122,7 @@ namespace api_inventorymisdss.Repository.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Products", (string)null);
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("api_inventorymisdss.Domain.ProductList", b =>
@@ -146,7 +149,7 @@ namespace api_inventorymisdss.Repository.Migrations
 
                     b.HasIndex("OutgoingId");
 
-                    b.ToTable("ProductLists", (string)null);
+                    b.ToTable("ProductLists");
                 });
 
             modelBuilder.Entity("api_inventorymisdss.ViewModels.IncomingProductVM", b =>
@@ -154,7 +157,7 @@ namespace api_inventorymisdss.Repository.Migrations
                     b.Property<int>("IncomingStockQuantity")
                         .HasColumnType("int");
 
-                    b.ToTable("IncomingProductVM", (string)null);
+                    b.ToTable("IncomingProductVM");
                 });
 
             modelBuilder.Entity("api_inventorymisdss.ViewModels.OutgoingProductVM", b =>
@@ -162,7 +165,7 @@ namespace api_inventorymisdss.Repository.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.ToTable("OutgoingProductVM", (string)null);
+                    b.ToTable("OutgoingProductVM");
                 });
 
             modelBuilder.Entity("api_inventorymisdss.ViewModels.ProductVM", b =>
@@ -188,7 +191,7 @@ namespace api_inventorymisdss.Repository.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.ToTable("ProductVM", (string)null);
+                    b.ToTable("ProductVM");
                 });
 
             modelBuilder.Entity("api_inventorymisdss.Domain.Incoming", b =>
