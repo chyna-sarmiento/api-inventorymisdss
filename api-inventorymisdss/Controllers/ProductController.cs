@@ -24,10 +24,10 @@ public static class ProductsController
                 appData.StockCount
             );
 
-            var NewProductAsList = ProductList.FromProduct(NewProduct);
+            var NewProductInList = new ProductList(NewProduct);
 
             db.Products.Add(NewProduct);
-            db.ProductList.Add(NewProductAsList);
+            db.ProductList.Add(NewProductInList);
             await db.SaveChangesAsync();
 
             return TypedResults.Created($"/api/Product/{NewProduct.Id}", NewProduct);

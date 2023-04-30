@@ -10,12 +10,9 @@ namespace api_inventorymisdss.Domain
         public Product Product { get; set; }
         public long ProductId { get; set; }
 
-        public static ProductList FromProduct(Product product)
+        public ProductList(Product product)
         {
-            return new ProductList
-            {
-                DisplayName = $"{product.Brand} {product.Name} {product.VariantName} ({product.Measurement})"
-            };
+            DisplayName = $"{product.Brand} {product.Name} {product.VariantName} ({product.Measurement})";
         }
     }
 }
