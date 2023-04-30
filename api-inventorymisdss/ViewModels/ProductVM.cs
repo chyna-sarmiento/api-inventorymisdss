@@ -21,5 +21,8 @@ namespace api_inventorymisdss.ViewModels
 
         [Required(ErrorMessage = "Provide the price of the product."), Range(1, 1000000, ErrorMessage = "The price must be more than 0.")]
         public decimal Price { get; set; }
+
+        [MaxLength(1000)]
+        public int StockCount { get; set; }
     }
 }

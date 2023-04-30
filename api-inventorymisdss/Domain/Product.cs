@@ -10,8 +10,8 @@ namespace api_inventorymisdss.Domain
         public string? Name { get; set; }
         public string? VariantName { get; set; }
         public string? Measurement { get; set; } //optional
-        public int StockCount { get; set; } //optional
         public decimal Price { get; set; }
+        public int StockCount { get; set; } //optional
         public DateTime LastUpdated { get; set; }
 
         public virtual ProductList ProductList { get; set; }
