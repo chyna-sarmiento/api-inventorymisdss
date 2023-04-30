@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using api_inventorymisdss.Domain;
 using api_inventorymisdss.Repository;
+using api_inventorymisdss.ViewModels;
+
 namespace api_inventorymisdss.Controllers;
 
 public static class IncomingController
@@ -9,6 +11,33 @@ public static class IncomingController
     public static void MapIncomingEndpoints (this IEndpointRouteBuilder routes)
     {
         var group = routes.MapGroup("/api/Incoming").WithTags(nameof(Incoming));
+
+        //group.MapPost("/", async (IncomingProductVM appData, ApplicationContext db) =>
+        //{
+        //    List<ProductList> existingProducts = ProductList.FromProduct(appData.ProductName);
+        //    var IncomingProduct = new Incoming(existingProducts, appData.IncomingStockQuantity);
+
+        //    db.Incomings.Add(IncomingProduct);
+        //    await db.SaveChangesAsync();
+        //    return TypedResults.Created($"/api/Incoming/{IncomingProduct.Id}", IncomingProduct);
+        //})
+        //.WithName("CreateIncoming")
+        //.WithOpenApi();
+
+        //group.MapPut("/{id}", async Task<Results<Ok, NotFound>> (long id, IncomingProductVM appData, ApplicationContext db) =>
+        //{
+        //    var affected = await db.Incomings
+        //        .Where(model => model.Id == id)
+        //        .ExecuteUpdateAsync(setters => setters
+        //          .SetProperty(m => m.ProductName, existingProduct)
+        //          .SetProperty(m => m.IncomingStockQuantity, appData.IncomingStockQuantity)
+        //          .SetProperty(m => m.LastUpdated, DateTime.Now)
+        //        );
+
+        //    return affected == 1 ? TypedResults.Ok() : TypedResults.NotFound();
+        //})
+        //.WithName("UpdateIncoming")
+        //.WithOpenApi();
 
         group.MapGet("/", async (ApplicationContext db) =>
         {
@@ -26,32 +55,6 @@ public static class IncomingController
                     : TypedResults.NotFound();
         })
         .WithName("GetIncomingById")
-        .WithOpenApi();
-
-        group.MapPut("/{id}", async Task<Results<Ok, NotFound>> (long id, Incoming incoming, ApplicationContext db) =>
-        {
-            var affected = await db.Incomings
-                .Where(model => model.Id == id)
-                .ExecuteUpdateAsync(setters => setters
-                  .SetProperty(m => m.Id, incoming.Id)
-                  .SetProperty(m => m.DateTimeRestock, incoming.DateTimeRestock)
-                  .SetProperty(m => m.IncomingStockQuantity, incoming.IncomingStockQuantity)
-                  .SetProperty(m => m.LastUpdated, incoming.LastUpdated)
-                  .SetProperty(m => m.IncomingProductId, incoming.IncomingProductId)
-                );
-
-            return affected == 1 ? TypedResults.Ok() : TypedResults.NotFound();
-        })
-        .WithName("UpdateIncoming")
-        .WithOpenApi();
-
-        group.MapPost("/", async (Incoming incoming, ApplicationContext db) =>
-        {
-            db.Incomings.Add(incoming);
-            await db.SaveChangesAsync();
-            return TypedResults.Created($"/api/Incoming/{incoming.Id}",incoming);
-        })
-        .WithName("CreateIncoming")
         .WithOpenApi();
 
         group.MapDelete("/{id}", async Task<Results<Ok, NotFound>> (long id, ApplicationContext db) =>

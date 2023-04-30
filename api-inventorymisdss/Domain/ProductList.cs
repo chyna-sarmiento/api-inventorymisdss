@@ -14,7 +14,6 @@ namespace api_inventorymisdss.Domain
         {
             return new ProductList
             {
-                Id = product.Id,
                 DisplayName = $"{product.Brand} {product.Name} {product.VariantName} ({product.Measurement})"
             };
         }

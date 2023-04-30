@@ -12,22 +12,27 @@ public static class ProductsController
     {
         var group = routes.MapGroup("/api/Product").WithTags(nameof(Product));
 
-        group.MapGet("/", async (ApplicationContext db) =>
-            {
-                return await db.Products.ToListAsync();
-            })
-            .WithName("GetAllProducts")
-            .WithOpenApi();
-
-        group.MapGet("/{id}", async Task<Results<Ok<Product>, NotFound>> (long id, ApplicationContext db) =>
+        group.MapPost("/", async (ProductVM appData, ApplicationContext db) =>
         {
-            return await db.Products.AsNoTracking()
-                .FirstOrDefaultAsync(model => model.Id == id)
-                is Product model
-                    ? TypedResults.Ok(model)
-                    : TypedResults.NotFound();
+            var NewProduct = new Product(
+                appData.BarcodeId,
+                appData.Brand,
+                appData.Name,
+                appData.VariantName,
+                appData.Measurement,
+                appData.Price,
+                appData.StockCount
+            );
+
+            var NewProductAsList = ProductList.FromProduct(NewProduct);
+
+            db.Products.Add(NewProduct);
+            db.ProductList.Add(NewProductAsList);
+            await db.SaveChangesAsync();
+
+            return TypedResults.Created($"/api/Product/{NewProduct.Id}", NewProduct);
         })
-        .WithName("GetProductById")
+        .WithName("CreateProduct")
         .WithOpenApi();
 
         group.MapPut("/{id}", async Task<Results<Ok, NotFound>> (long id, ProductVM appData, ApplicationContext db) =>
@@ -50,22 +55,22 @@ public static class ProductsController
         .WithName("UpdateProduct")
         .WithOpenApi();
 
-        group.MapPost("/", async (ProductVM appData, ApplicationContext db) =>
-        {
-            var NewProduct = new Product(
-                appData.BarcodeId,
-                appData.Brand,
-                appData.Name,
-                appData.VariantName,
-                appData.Measurement,
-                appData.Price
-            );
+        group.MapGet("/", async (ApplicationContext db) =>
+            {
+                return await db.Products.ToListAsync();
+            })
+            .WithName("GetAllProducts")
+            .WithOpenApi();
 
-            db.Products.Add(NewProduct);
-            await db.SaveChangesAsync();
-            return TypedResults.Created($"/api/Product/{NewProduct.Id}", NewProduct);
+        group.MapGet("/{id}", async Task<Results<Ok<Product>, NotFound>> (long id, ApplicationContext db) =>
+        {
+            return await db.Products.AsNoTracking()
+                .FirstOrDefaultAsync(model => model.Id == id)
+                is Product model
+                    ? TypedResults.Ok(model)
+                    : TypedResults.NotFound();
         })
-        .WithName("CreateProduct")
+        .WithName("GetProductById")
         .WithOpenApi();
 
         group.MapDelete("/{id}", async Task<Results<Ok, NotFound>> (long id, ApplicationContext db) =>

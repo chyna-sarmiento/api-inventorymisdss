@@ -20,7 +20,7 @@ namespace api_inventorymisdss.Domain
             ProductName = new List<ProductList>();
         }
 
-        public Outgoing(int quantity, List<ProductList> productName)
+        public Outgoing(List<ProductList> productName, int quantity)
         {
             ProductName = productName;
             Quantity = quantity;

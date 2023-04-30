@@ -15,7 +15,7 @@ namespace api_inventorymisdss.Domain
         public DateTime LastUpdated { get; set; }
 
         public virtual ProductList ProductList { get; set; }
-        public Product(string barcodeId, string brand, string name, string variantName, string measurement, decimal price)
+        public Product(string barcodeId, string brand, string name, string variantName, string measurement, decimal price, int stockCount)
         {
             BarcodeId = barcodeId;
             Brand = brand;
@@ -23,6 +23,7 @@ namespace api_inventorymisdss.Domain
             VariantName = variantName;
             Measurement = measurement;
             Price = price;
+            StockCount = stockCount;
             LastUpdated = DateTime.Now;
         }
     }
