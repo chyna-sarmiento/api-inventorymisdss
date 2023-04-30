@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Repository\Migrations\" />
     <Folder Include="Views\" />
   </ItemGroup>
 

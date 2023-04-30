@@ -24,11 +24,11 @@ namespace api_inventorymisdss.Repository.Migrations
 
             modelBuilder.Entity("api_inventorymisdss.Domain.Incoming", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("DateTimeRestock")
                         .HasColumnType("datetime2");
@@ -49,7 +49,7 @@ namespace api_inventorymisdss.Repository.Migrations
 
                     b.HasIndex("ProductListId");
 
-                    b.ToTable("Incomings", (string)null);
+                    b.ToTable("Incomings");
                 });
 
             modelBuilder.Entity("api_inventorymisdss.Domain.Outgoing", b =>
@@ -82,7 +82,7 @@ namespace api_inventorymisdss.Repository.Migrations
 
                     b.HasIndex("ProductListId");
 
-                    b.ToTable("Outgoings", (string)null);
+                    b.ToTable("Outgoings");
                 });
 
             modelBuilder.Entity("api_inventorymisdss.Domain.Product", b =>
@@ -119,7 +119,7 @@ namespace api_inventorymisdss.Repository.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Products", (string)null);
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("api_inventorymisdss.Domain.ProductList", b =>
@@ -134,10 +134,13 @@ namespace api_inventorymisdss.Repository.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("IncomingId")
-                        .HasColumnType("int");
+                    b.Property<long?>("IncomingId")
+                        .HasColumnType("bigint");
 
                     b.Property<long?>("OutgoingId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("ProductId")
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
@@ -146,49 +149,10 @@ namespace api_inventorymisdss.Repository.Migrations
 
                     b.HasIndex("OutgoingId");
 
-                    b.ToTable("ProductLists", (string)null);
-                });
+                    b.HasIndex("ProductId")
+                        .IsUnique();
 
-            modelBuilder.Entity("api_inventorymisdss.ViewModels.IncomingProductVM", b =>
-                {
-                    b.Property<int>("IncomingStockQuantity")
-                        .HasColumnType("int");
-
-                    b.ToTable("IncomingProductVM", (string)null);
-                });
-
-            modelBuilder.Entity("api_inventorymisdss.ViewModels.OutgoingProductVM", b =>
-                {
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.ToTable("OutgoingProductVM", (string)null);
-                });
-
-            modelBuilder.Entity("api_inventorymisdss.ViewModels.ProductVM", b =>
-                {
-                    b.Property<string>("BarcodeId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Brand")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Measurement")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("VariantName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.ToTable("ProductVM", (string)null);
+                    b.ToTable("ProductList");
                 });
 
             modelBuilder.Entity("api_inventorymisdss.Domain.Incoming", b =>
@@ -222,6 +186,14 @@ namespace api_inventorymisdss.Repository.Migrations
                     b.HasOne("api_inventorymisdss.Domain.Outgoing", null)
                         .WithMany("ProductName")
                         .HasForeignKey("OutgoingId");
+
+                    b.HasOne("api_inventorymisdss.Domain.Product", "Product")
+                        .WithOne("ProductList")
+                        .HasForeignKey("api_inventorymisdss.Domain.ProductList", "ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("api_inventorymisdss.Domain.Incoming", b =>
@@ -232,6 +204,12 @@ namespace api_inventorymisdss.Repository.Migrations
             modelBuilder.Entity("api_inventorymisdss.Domain.Outgoing", b =>
                 {
                     b.Navigation("ProductName");
+                });
+
+            modelBuilder.Entity("api_inventorymisdss.Domain.Product", b =>
+                {
+                    b.Navigation("ProductList")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

@@ -1,4 +1,5 @@
-﻿using Microsoft.Identity.Client;
+﻿using api_inventorymisdss.ViewModels;
+using Microsoft.Identity.Client;
 
 namespace api_inventorymisdss.Domain
 {

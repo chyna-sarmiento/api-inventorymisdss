@@ -12,7 +12,7 @@ using api_inventorymisdss.Repository;
 namespace api_inventorymisdss.Repository.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20230428004929_InitialCreate")]
+    [Migration("20230430083544_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -27,24 +27,30 @@ namespace api_inventorymisdss.Repository.Migrations
 
             modelBuilder.Entity("api_inventorymisdss.Domain.Incoming", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("DateTimeRestock")
                         .HasColumnType("datetime2");
 
-                    b.Property<long>("ProductId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("StockCount")
+                    b.Property<int>("IncomingProductId")
                         .HasColumnType("int");
+
+                    b.Property<int>("IncomingStockQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long>("ProductListId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("ProductListId");
 
                     b.ToTable("Incomings");
                 });
@@ -63,7 +69,10 @@ namespace api_inventorymisdss.Repository.Migrations
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("datetime2");
 
-                    b.Property<long>("ProductId")
+                    b.Property<int>("OutgoingProductId")
+                        .HasColumnType("int");
+
+                    b.Property<long>("ProductListId")
                         .HasColumnType("bigint");
 
                     b.Property<int>("Quantity")
@@ -74,7 +83,7 @@ namespace api_inventorymisdss.Repository.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("ProductListId");
 
                     b.ToTable("Outgoings");
                 });
@@ -116,26 +125,94 @@ namespace api_inventorymisdss.Repository.Migrations
                     b.ToTable("Products");
                 });
 
+            modelBuilder.Entity("api_inventorymisdss.Domain.ProductList", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long?>("IncomingId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("OutgoingId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("ProductId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IncomingId");
+
+                    b.HasIndex("OutgoingId");
+
+                    b.HasIndex("ProductId")
+                        .IsUnique();
+
+                    b.ToTable("ProductList");
+                });
+
             modelBuilder.Entity("api_inventorymisdss.Domain.Incoming", b =>
                 {
-                    b.HasOne("api_inventorymisdss.Domain.Product", "Product")
+                    b.HasOne("api_inventorymisdss.Domain.ProductList", "ProductList")
                         .WithMany()
-                        .HasForeignKey("ProductId")
+                        .HasForeignKey("ProductListId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProductList");
+                });
+
+            modelBuilder.Entity("api_inventorymisdss.Domain.Outgoing", b =>
+                {
+                    b.HasOne("api_inventorymisdss.Domain.ProductList", "ProductList")
+                        .WithMany()
+                        .HasForeignKey("ProductListId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProductList");
+                });
+
+            modelBuilder.Entity("api_inventorymisdss.Domain.ProductList", b =>
+                {
+                    b.HasOne("api_inventorymisdss.Domain.Incoming", null)
+                        .WithMany("ProductName")
+                        .HasForeignKey("IncomingId");
+
+                    b.HasOne("api_inventorymisdss.Domain.Outgoing", null)
+                        .WithMany("ProductName")
+                        .HasForeignKey("OutgoingId");
+
+                    b.HasOne("api_inventorymisdss.Domain.Product", "Product")
+                        .WithOne("ProductList")
+                        .HasForeignKey("api_inventorymisdss.Domain.ProductList", "ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("api_inventorymisdss.Domain.Incoming", b =>
+                {
+                    b.Navigation("ProductName");
+                });
+
             modelBuilder.Entity("api_inventorymisdss.Domain.Outgoing", b =>
                 {
-                    b.HasOne("api_inventorymisdss.Domain.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("ProductName");
+                });
 
-                    b.Navigation("Product");
+            modelBuilder.Entity("api_inventorymisdss.Domain.Product", b =>
+                {
+                    b.Navigation("ProductList")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

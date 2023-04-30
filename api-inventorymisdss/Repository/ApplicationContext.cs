@@ -14,10 +14,6 @@ namespace api_inventorymisdss.Repository
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<ProductVM>()
-                    .Property(p => p.Price)
-                    .HasColumnType("decimal(18,2)");
-
             modelBuilder.Entity<Product>()
                     .Property(p => p.Price)
                     .HasColumnType("decimal(18,2)");

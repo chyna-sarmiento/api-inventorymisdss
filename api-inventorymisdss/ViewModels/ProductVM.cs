@@ -10,16 +10,16 @@ namespace api_inventorymisdss.ViewModels
         [MaxLength(160)]
         public string Brand { get; set; }
 
-        [Required, MaxLength(160)]
+        [Required(ErrorMessage = "Provide the name of the product."), MaxLength(160)]
         public string Name { get; set; }
 
-        [Required, MaxLength(160)]
+        [MaxLength(160)]
         public string VariantName { get; set; }
 
         [MaxLength(30)]
         public string? Measurement { get; set; }
 
-        [Required, MaxLength(30)]
+        [Required(ErrorMessage = "Provide the price of the product."), Range(1, 1000000, ErrorMessage = "The price must be more than 0.")]
         public decimal Price { get; set; }
     }
 }
