@@ -15,6 +15,12 @@ public static class OutgoingController
         group.MapPost("/", async (OutgoingProductVM appData, ApplicationContext db) =>
         {
             var product = await db.Products.FindAsync(appData.OutgoingProductId);
+
+            if (product == null)
+            {
+                TypedResults.NotFound(appData.OutgoingProductId);
+            }
+
             var OutgoingProduct = new Outgoing(appData.OutgoingProductId, appData.Quantity)
             {
                 ProductPrice = product.Price
@@ -32,7 +38,7 @@ public static class OutgoingController
             await db.SaveChangesAsync();
             return TypedResults.Created($"/api/Outgoing/{OutgoingProduct.Id}", OutgoingProduct);
         })
-        .WithName("CreateOutgoing")
+        .WithName("CreateOutgoingEntry")
         .WithOpenApi();
 
         group.MapPut("/{id}", async Task<Results<Ok, NotFound>> (long id, OutgoingProductVM appData, ApplicationContext db) =>
@@ -46,14 +52,14 @@ public static class OutgoingController
 
             return affected == 1 ? TypedResults.Ok() : TypedResults.NotFound();
         })
-        .WithName("UpdateOutgoing")
+        .WithName("UpdateOutgoingEntry")
         .WithOpenApi();
 
         group.MapGet("/", async (ApplicationContext db) =>
         {
             return await db.Outgoings.ToListAsync();
         })
-        .WithName("GetAllOutgoings")
+        .WithName("GetAllOutgoingProducts")
         .WithOpenApi();
 
         group.MapGet("/{id}", async Task<Results<Ok<Outgoing>, NotFound>> (long id, ApplicationContext db) =>
@@ -64,7 +70,7 @@ public static class OutgoingController
                     ? TypedResults.Ok(model)
                     : TypedResults.NotFound();
         })
-        .WithName("GetOutgoingById")
+        .WithName("GetOutgoingProductById")
         .WithOpenApi();
 
         group.MapDelete("/{id}", async Task<Results<Ok, NotFound>> (long id, ApplicationContext db) =>
@@ -75,7 +81,7 @@ public static class OutgoingController
 
             return affected == 1 ? TypedResults.Ok() : TypedResults.NotFound();
         })
-        .WithName("DeleteOutgoing")
+        .WithName("DeleteOutgoingEntry")
         .WithOpenApi();
     }
 }
