@@ -5,7 +5,7 @@ namespace api_inventorymisdss.ViewModels
     public class OutgoingProductVM
     {
         [Required]
-        public List<ProductListVM> ProductName { get; set; }
+        public long OutgoingProductId { get; set; }
 
         [Required, MaxLength(7)]
         public int Quantity { get; set; }

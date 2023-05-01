@@ -54,11 +54,11 @@ public static class ProductsController
 
         group.MapGet("/", async (ApplicationContext db) =>
         {
-            var productList = db.Products.Select(p => new ProductListVM
+            var productList = await db.Products.Select(p => new ProductListVM
             {
                 Id = p.Id,
                 DisplayName = $"{p.Brand} {p.Name} {p.VariantName} ({p.Measurement})"
-            }).ToList();
+            }).ToListAsync();
 
             return productList;
         })

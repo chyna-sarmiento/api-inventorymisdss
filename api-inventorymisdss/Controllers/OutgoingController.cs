@@ -12,33 +12,30 @@ public static class OutgoingController
     {
         var group = routes.MapGroup("/api/Outgoing").WithTags(nameof(Outgoing));
 
-        //group.MapPost("/", async (OutgoingProductVM appData, ApplicationContext db) =>
-        //{
-        //    List<ProductList> existingProducts = ProductList.FromProduct(appData.ProductName);
-        //    var OutgoingProduct = new Outgoing(existingProducts, appData.Quantity);
+        group.MapPost("/", async (OutgoingProductVM appData, ApplicationContext db) =>
+        {
+            var OutgoingProduct = new Outgoing(appData.OutgoingProductId, appData.Quantity);
 
-        //    db.Outgoings.Add(OutgoingProduct);
-        //    await db.SaveChangesAsync();
-        //    return TypedResults.Created($"/api/Outgoing/{OutgoingProduct.Id}", OutgoingProduct);
-        //})
-        //.WithName("CreateOutgoing")
-        //.WithOpenApi();
+            db.Outgoings.Add(OutgoingProduct);
+            await db.SaveChangesAsync();
+            return TypedResults.Created($"/api/Outgoing/{OutgoingProduct.Id}", OutgoingProduct);
+        })
+        .WithName("CreateOutgoing")
+        .WithOpenApi();
 
-        //group.MapPut("/{id}", async Task<Results<Ok, NotFound>> (long id, OutgoingProductVM appData, ApplicationContext db) =>
-        //{
-        //    List<ProductList> existingProducts = ProductList.FromProduct(appData.ProductName);
+        group.MapPut("/{id}", async Task<Results<Ok, NotFound>> (long id, OutgoingProductVM appData, ApplicationContext db) =>
+        {
+            var affected = await db.Outgoings
+                .Where(model => model.Id == id)
+                .ExecuteUpdateAsync(setters => setters
+                  .SetProperty(m => m.OutgoingProductId, appData.OutgoingProductId)
+                  .SetProperty(m => m.Quantity, appData.Quantity)
+                );
 
-        //    var affected = await db.Outgoings
-        //        .Where(model => model.Id == id)
-        //        .ExecuteUpdateAsync(setters => setters
-        //          .SetProperty(m => m.ProductName, existingProducts)
-        //          .SetProperty(m => m.Quantity, appData.Quantity)
-        //        );
-
-        //    return affected == 1 ? TypedResults.Ok() : TypedResults.NotFound();
-        //})
-        //.WithName("UpdateOutgoing")
-        //.WithOpenApi();
+            return affected == 1 ? TypedResults.Ok() : TypedResults.NotFound();
+        })
+        .WithName("UpdateOutgoing")
+        .WithOpenApi();
 
         group.MapGet("/", async (ApplicationContext db) =>
         {

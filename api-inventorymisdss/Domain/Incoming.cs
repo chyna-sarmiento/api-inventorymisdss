@@ -14,11 +14,6 @@ namespace api_inventorymisdss.Domain
         public Product Product { get; set; }
         public long IncomingProductId { get; set; }
 
-        public Incoming()
-        {
-            //ProductName = new List<ProductList>();
-        }
-
         public Incoming(long incomingProductId, int incomingStockQuantity)
         {
             IncomingProductId = incomingProductId;
