@@ -35,6 +35,4 @@ app.MapIncomingEndpoints();
 
 app.MapOutgoingEndpoints();
 
-app.MapProductListEndpoints();
-
 app.Run();

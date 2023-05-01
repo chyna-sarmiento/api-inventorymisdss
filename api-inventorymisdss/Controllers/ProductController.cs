@@ -24,10 +24,7 @@ public static class ProductsController
                 appData.StockCount
             );
 
-            var NewProductInList = new ProductList(NewProduct);
-
             db.Products.Add(NewProduct);
-            db.ProductList.Add(NewProductInList);
             await db.SaveChangesAsync();
 
             return TypedResults.Created($"/api/Product/{NewProduct.Id}", NewProduct);
@@ -53,6 +50,19 @@ public static class ProductsController
             return affected == 1 ? TypedResults.Ok() : TypedResults.NotFound();
         })
         .WithName("UpdateProduct")
+        .WithOpenApi();
+
+        group.MapGet("/", async (ApplicationContext db) =>
+        {
+            var productList = db.Products.Select(p => new ProductListVM
+            {
+                Id = p.Id,
+                DisplayName = $"{p.Brand} {p.Name} {p.VariantName} ({p.Measurement})"
+            }).ToList();
+
+            return productList;
+        })
+        .WithName("GetProductList")
         .WithOpenApi();
 
         group.MapGet("/", async (ApplicationContext db) =>

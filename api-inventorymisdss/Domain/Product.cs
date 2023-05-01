@@ -14,7 +14,6 @@ namespace api_inventorymisdss.Domain
         public int StockCount { get; set; } //optional
         public DateTime LastUpdated { get; set; }
 
-        public virtual ProductList ProductList { get; set; }
         public Product(string barcodeId, string brand, string name, string variantName, string measurement, decimal price, int stockCount)
         {
             BarcodeId = barcodeId;

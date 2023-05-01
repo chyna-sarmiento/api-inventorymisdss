@@ -8,21 +8,20 @@ namespace api_inventorymisdss.Domain
     {
         public long Id { get; set; }
         public DateTime DateTimeRestock { get; set; }
-        public List<ProductList> ProductName { get; set; }
         public int IncomingStockQuantity { get; set; }
         public DateTime LastUpdated { get; set; }
 
-        public ProductList ProductList { get; set; }
-        public int IncomingProductId { get; set; }
+        public Product Product { get; set; }
+        public long IncomingProductId { get; set; }
 
         public Incoming()
         {
-            ProductName = new List<ProductList>();
+            //ProductName = new List<ProductList>();
         }
 
-        public Incoming(List<ProductList> productName, int incomingStockQuantity)
+        public Incoming(long incomingProductId, int incomingStockQuantity)
         {
-            ProductName = productName;
+            IncomingProductId = incomingProductId;
             IncomingStockQuantity = incomingStockQuantity;
             DateTimeRestock = DateTime.Now;
         }

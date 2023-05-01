@@ -22,7 +22,5 @@ namespace api_inventorymisdss.Repository
                     .Property(o => o.TotalPrice)
                     .HasColumnType("decimal(18,2)");
         }
-
-        public DbSet<api_inventorymisdss.Domain.ProductList> ProductList { get; set; } = default!;
     }
 }
