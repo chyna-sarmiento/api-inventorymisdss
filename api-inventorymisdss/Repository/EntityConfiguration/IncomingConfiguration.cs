@@ -14,6 +14,7 @@ namespace api_inventorymisdss.Repository.EntityConfiguration
             builder.HasOne(p => p.Product)
                 .WithMany()
                 .HasForeignKey(i => i.IncomingProductId)
+                .HasConstraintName("FK_Incomings_Products_IncomingProductId")
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

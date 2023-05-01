@@ -12,8 +12,8 @@ using api_inventorymisdss.Repository;
 namespace api_inventorymisdss.Repository.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20230501020930_DeleteProductList")]
-    partial class DeleteProductList
+    [Migration("20230501054157_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -74,6 +74,9 @@ namespace api_inventorymisdss.Repository.Migrations
 
                     b.Property<long>("ProductId")
                         .HasColumnType("bigint");
+
+                    b.Property<decimal>("ProductPrice")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");

@@ -1,6 +1,4 @@
-﻿using api_inventorymisdss.ViewModels;
-
-namespace api_inventorymisdss.Domain
+﻿namespace api_inventorymisdss.Domain
 {
     public class Product
     {

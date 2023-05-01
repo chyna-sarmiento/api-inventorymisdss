@@ -1,7 +1,4 @@
-﻿using api_inventorymisdss.ViewModels;
-using Microsoft.Identity.Client;
-
-namespace api_inventorymisdss.Domain
+﻿namespace api_inventorymisdss.Domain
 {
     public class Outgoing
     {

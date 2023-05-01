@@ -1,8 +1,4 @@
-﻿using api_inventorymisdss.Repository;
-using api_inventorymisdss.ViewModels;
-using Microsoft.EntityFrameworkCore;
-
-namespace api_inventorymisdss.Domain
+﻿namespace api_inventorymisdss.Domain
 {
     public class Incoming
     {
