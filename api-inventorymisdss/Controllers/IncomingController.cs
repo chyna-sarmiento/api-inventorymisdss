@@ -14,7 +14,11 @@ public static class IncomingController
 
         group.MapPost("/", async (IncomingProductVM appData, ApplicationContext db) =>
         {
+            var product = await db.Products.FindAsync(appData.IncomingProductId);
             var IncomingProduct = new Incoming(appData.IncomingProductId, appData.IncomingStockQuantity);
+
+            product.StockCount += appData.IncomingStockQuantity;
+            product.LastUpdated = DateTime.UtcNow;
 
             db.Incomings.Add(IncomingProduct);
             await db.SaveChangesAsync();
@@ -25,6 +29,9 @@ public static class IncomingController
 
         group.MapPut("/{id}", async Task<Results<Ok, NotFound>> (long id, IncomingProductVM appData, ApplicationContext db) =>
         {
+            var preIncoming = await db.Incomings.FindAsync(id);
+            var product = await db.Products.FindAsync(appData.IncomingProductId);
+
             var affected = await db.Incomings
                 .Where(model => model.Id == id)
                 .ExecuteUpdateAsync(setters => setters
@@ -33,9 +40,39 @@ public static class IncomingController
                   .SetProperty(m => m.LastUpdated, DateTime.UtcNow)
                 );
 
+            int diffQuantity = preIncoming.IncomingStockQuantity - appData.IncomingStockQuantity;
+
+            if(diffQuantity < 0)
+            {
+                product.StockCount -= diffQuantity;
+            }
+            else
+            {
+                product.StockCount += diffQuantity;
+            }
+            product.LastUpdated = DateTime.UtcNow;
+
+            await db.SaveChangesAsync();
+
             return affected == 1 ? TypedResults.Ok() : TypedResults.NotFound();
         })
         .WithName("UpdateIncoming")
+        .WithOpenApi();
+
+        group.MapGet("/List", async (ApplicationContext db) =>
+        {
+            var incomingList = await db.Incomings.Select(i => new IncomingListVM
+            {
+                Id = i.Id,
+                DateTimeRestock = i.DateTimeRestock,
+                ProductName = $"{i.Product.Brand} {i.Product.Name} {i.Product.VariantName} ({i.Product.Measurement})",
+                IncomingStockQuantity = i.IncomingStockQuantity,
+                LastUpdated = i.LastUpdated
+            }).ToListAsync();
+
+            return incomingList;
+        })
+        .WithName("GetIncomingList")
         .WithOpenApi();
 
         group.MapGet("/", async (ApplicationContext db) =>
