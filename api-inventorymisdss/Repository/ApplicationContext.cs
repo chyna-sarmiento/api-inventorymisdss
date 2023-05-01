@@ -1,12 +1,11 @@
 ﻿using api_inventorymisdss.Domain;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection.Metadata;
 
 namespace api_inventorymisdss.Repository
 {
     public class ApplicationContext : DbContext
     {
-        public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options){}
+        public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options) { }
 
         public virtual DbSet<Product> Products { get; set; }
         public virtual DbSet<Incoming> Incomings { get; set; }
@@ -15,12 +14,16 @@ namespace api_inventorymisdss.Repository
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Product>()
-                .Property(p => p.Price)
-                .HasColumnType("decimal(18,2)");
+                    .Property(p => p.Price)
+                    .HasColumnType("decimal(18,2)");
 
             modelBuilder.Entity<Outgoing>()
-                .Property(o => o.TotalPrice)
-                .HasColumnType("decimal(18,2)");
+                    .Property(o => o.ProductPrice)
+                    .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<Outgoing>()
+                    .Property(o => o.TotalPrice)
+                    .HasColumnType("decimal(18,2)");
         }
     }
 }

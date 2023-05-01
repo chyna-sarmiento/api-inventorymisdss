@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace api_inventorymisdss.Domain
+﻿namespace api_inventorymisdss.Domain
 {
     public class Product
     {
@@ -10,11 +8,11 @@ namespace api_inventorymisdss.Domain
         public string? Name { get; set; }
         public string? VariantName { get; set; }
         public string? Measurement { get; set; } //optional
-        public int StockCount { get; set; } //optional
         public decimal Price { get; set; }
+        public int StockCount { get; set; } //optional
         public DateTime LastUpdated { get; set; }
 
-        public Product(string barcodeId, string brand, string name, string variantName, string measurement, decimal price)
+        public Product(string barcodeId, string brand, string name, string variantName, string measurement, decimal price, int stockCount)
         {
             BarcodeId = barcodeId;
             Brand = brand;
@@ -22,7 +20,8 @@ namespace api_inventorymisdss.Domain
             VariantName = variantName;
             Measurement = measurement;
             Price = price;
-            LastUpdated = DateTime.Now;
+            StockCount = stockCount;
+            LastUpdated = DateTime.UtcNow;
         }
     }
 }

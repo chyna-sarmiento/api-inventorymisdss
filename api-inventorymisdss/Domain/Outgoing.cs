@@ -1,21 +1,26 @@
-﻿namespace api_inventorymisdss.Domain
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace api_inventorymisdss.Domain
 {
     public class Outgoing
     {
         public long Id { get; set; }
-        public DateTime DateTimeOutgoing { get; set; }
         public int Quantity { get; set; }
+        public decimal ProductPrice { get; set; }
         public decimal TotalPrice { get; set; }
+        public DateTime DateTimeOutgoing { get; set; }
         public DateTime LastUpdated { get; set; }
 
-        public Product? Product { get; set; }
-        public long ProductId { get; set; }
-        public string ProductName { get; set; }
+        [ForeignKey("OutgoingProductId")]
+        public Product Product { get; set; }
+        public long OutgoingProductId { get; set; }
 
-        public Outgoing(int quantity)
+        public Outgoing(long outgoingProductId, int quantity)
         {
-            DateTimeOutgoing = DateTime.Now;
+            OutgoingProductId = outgoingProductId;
             Quantity = quantity;
+            DateTimeOutgoing = DateTime.UtcNow;
+            LastUpdated = DateTimeOutgoing;
         }   
     }
 }
