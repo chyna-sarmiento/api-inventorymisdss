@@ -1,4 +1,6 @@
-﻿namespace api_inventorymisdss.Domain
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace api_inventorymisdss.Domain
 {
     public class Outgoing
     {
@@ -9,6 +11,7 @@
         public DateTime DateTimeOutgoing { get; set; }
         public DateTime LastUpdated { get; set; }
 
+        [ForeignKey("OutgoingProductId")]
         public Product Product { get; set; }
         public long OutgoingProductId { get; set; }
 

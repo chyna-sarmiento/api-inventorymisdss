@@ -40,15 +40,14 @@ namespace api_inventorymisdss.Repository.Migrations
                     DateTimeRestock = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IncomingStockQuantity = table.Column<int>(type: "int", nullable: false),
                     LastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ProductId = table.Column<long>(type: "bigint", nullable: false),
                     IncomingProductId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Incomings", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Incomings_Products_ProductId",
-                        column: x => x.ProductId,
+                        name: "FK_Incomings_Products_IncomingProductId",
+                        column: x => x.IncomingProductId,
                         principalTable: "Products",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -65,29 +64,28 @@ namespace api_inventorymisdss.Repository.Migrations
                     TotalPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     DateTimeOutgoing = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ProductId = table.Column<long>(type: "bigint", nullable: false),
                     OutgoingProductId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Outgoings", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Outgoings_Products_ProductId",
-                        column: x => x.ProductId,
+                        name: "FK_Outgoings_Products_OutgoingProductId",
+                        column: x => x.OutgoingProductId,
                         principalTable: "Products",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Incomings_ProductId",
+                name: "IX_Incomings_IncomingProductId",
                 table: "Incomings",
-                column: "ProductId");
+                column: "IncomingProductId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Outgoings_ProductId",
+                name: "IX_Outgoings_OutgoingProductId",
                 table: "Outgoings",
-                column: "ProductId");
+                column: "OutgoingProductId");
         }
 
         /// <inheritdoc />

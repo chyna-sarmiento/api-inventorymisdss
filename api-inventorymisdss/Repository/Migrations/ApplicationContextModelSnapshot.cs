@@ -42,12 +42,9 @@ namespace api_inventorymisdss.Repository.Migrations
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("datetime2");
 
-                    b.Property<long>("ProductId")
-                        .HasColumnType("bigint");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("IncomingProductId");
 
                     b.ToTable("Incomings");
                 });
@@ -69,9 +66,6 @@ namespace api_inventorymisdss.Repository.Migrations
                     b.Property<long>("OutgoingProductId")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("ProductId")
-                        .HasColumnType("bigint");
-
                     b.Property<decimal>("ProductPrice")
                         .HasColumnType("decimal(18,2)");
 
@@ -83,7 +77,7 @@ namespace api_inventorymisdss.Repository.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("OutgoingProductId");
 
                     b.ToTable("Outgoings");
                 });
@@ -129,7 +123,7 @@ namespace api_inventorymisdss.Repository.Migrations
                 {
                     b.HasOne("api_inventorymisdss.Domain.Product", "Product")
                         .WithMany()
-                        .HasForeignKey("ProductId")
+                        .HasForeignKey("IncomingProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -140,7 +134,7 @@ namespace api_inventorymisdss.Repository.Migrations
                 {
                     b.HasOne("api_inventorymisdss.Domain.Product", "Product")
                         .WithMany()
-                        .HasForeignKey("ProductId")
+                        .HasForeignKey("OutgoingProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

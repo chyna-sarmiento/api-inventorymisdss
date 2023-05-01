@@ -24,8 +24,8 @@ public static class OutgoingController
             {
                 OutgoingProduct.TotalPrice = appData.Quantity * product.Price;
 
-                //product.StockCount -= appData.Quantity;
-                //product.LastUpdated = DateTime.UtcNow;
+                product.StockCount -= appData.Quantity;
+                product.LastUpdated = DateTime.UtcNow;
             }
 
             db.Outgoings.Add(OutgoingProduct);
