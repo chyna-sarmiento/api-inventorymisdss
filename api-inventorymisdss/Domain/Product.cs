@@ -23,7 +23,7 @@ namespace api_inventorymisdss.Domain
             Measurement = measurement;
             Price = price;
             StockCount = stockCount;
-            LastUpdated = DateTime.Now;
+            LastUpdated = DateTime.UtcNow;
         }
     }
 }

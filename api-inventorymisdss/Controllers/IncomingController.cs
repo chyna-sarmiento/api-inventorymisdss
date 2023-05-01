@@ -30,7 +30,7 @@ public static class IncomingController
                 .ExecuteUpdateAsync(setters => setters
                   .SetProperty(m => m.IncomingProductId, appData.IncomingProductId)
                   .SetProperty(m => m.IncomingStockQuantity, appData.IncomingStockQuantity)
-                  .SetProperty(m => m.LastUpdated, DateTime.Now)
+                  .SetProperty(m => m.LastUpdated, DateTime.UtcNow)
                 );
 
             return affected == 1 ? TypedResults.Ok() : TypedResults.NotFound();

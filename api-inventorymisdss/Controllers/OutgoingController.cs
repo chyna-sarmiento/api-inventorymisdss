@@ -3,18 +3,33 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using api_inventorymisdss.Domain;
 using api_inventorymisdss.Repository;
 using api_inventorymisdss.ViewModels;
+using Azure.Core;
+using Microsoft.AspNetCore.Mvc;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace api_inventorymisdss.Controllers;
 
 public static class OutgoingController
 {
-    public static void MapOutgoingEndpoints (this IEndpointRouteBuilder routes)
+    public static void MapOutgoingEndpoints(this IEndpointRouteBuilder routes)
     {
         var group = routes.MapGroup("/api/Outgoing").WithTags(nameof(Outgoing));
 
         group.MapPost("/", async (OutgoingProductVM appData, ApplicationContext db) =>
         {
-            var OutgoingProduct = new Outgoing(appData.OutgoingProductId, appData.Quantity);
+            var product = await db.Products.FindAsync(appData.OutgoingProductId);
+            var OutgoingProduct = new Outgoing(appData.OutgoingProductId, appData.Quantity)
+            {
+                ProductPrice = product.Price
+            };
+
+            if (product.StockCount >= appData.Quantity)
+            {
+                OutgoingProduct.TotalPrice = appData.Quantity * product.Price;
+
+                product.StockCount -= appData.Quantity;
+                product.LastUpdated = DateTime.UtcNow;
+            }
 
             db.Outgoings.Add(OutgoingProduct);
             await db.SaveChangesAsync();

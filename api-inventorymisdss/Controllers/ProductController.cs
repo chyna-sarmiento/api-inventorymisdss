@@ -44,7 +44,7 @@ public static class ProductsController
                   .SetProperty(m => m.Measurement, appData.Measurement)
                   .SetProperty(m => m.StockCount, appData.StockCount)
                   .SetProperty(m => m.Price, appData.Price)
-                  .SetProperty(m => m.LastUpdated, DateTime.Now)
+                  .SetProperty(m => m.LastUpdated, DateTime.UtcNow)
                 );
 
             return affected == 1 ? TypedResults.Ok() : TypedResults.NotFound();
@@ -52,7 +52,7 @@ public static class ProductsController
         .WithName("UpdateProduct")
         .WithOpenApi();
 
-        group.MapGet("/", async (ApplicationContext db) =>
+        group.MapGet("/List", async (ApplicationContext db) =>
         {
             var productList = await db.Products.Select(p => new ProductListVM
             {

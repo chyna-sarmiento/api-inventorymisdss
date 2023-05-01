@@ -19,6 +19,10 @@ namespace api_inventorymisdss.Repository
                     .HasColumnType("decimal(18,2)");
 
             modelBuilder.Entity<Outgoing>()
+                    .Property(o => o.ProductPrice)
+                    .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<Outgoing>()
                     .Property(o => o.TotalPrice)
                     .HasColumnType("decimal(18,2)");
         }

@@ -7,6 +7,7 @@ namespace api_inventorymisdss.Domain
     {
         public long Id { get; set; }
         public int Quantity { get; set; }
+        public decimal ProductPrice { get; set; }
         public decimal TotalPrice { get; set; }
         public DateTime DateTimeOutgoing { get; set; }
         public DateTime LastUpdated { get; set; }
@@ -18,7 +19,8 @@ namespace api_inventorymisdss.Domain
         {
             OutgoingProductId = outgoingProductId;
             Quantity = quantity;
-            DateTimeOutgoing = DateTime.Now;
+            DateTimeOutgoing = DateTime.UtcNow;
+            LastUpdated = DateTimeOutgoing;
         }   
     }
 }
