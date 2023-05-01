@@ -15,6 +15,12 @@ public static class OutgoingController
         group.MapPost("/", async (OutgoingProductVM appData, ApplicationContext db) =>
         {
             var product = await db.Products.FindAsync(appData.OutgoingProductId);
+
+            //if (product == null)
+            //{
+            //    TypedResults.NotFound(appData.OutgoingProductId);
+            //}
+
             var OutgoingProduct = new Outgoing(appData.OutgoingProductId, appData.Quantity)
             {
                 ProductPrice = product.Price
@@ -32,21 +38,50 @@ public static class OutgoingController
             await db.SaveChangesAsync();
             return TypedResults.Created($"/api/Outgoing/{OutgoingProduct.Id}", OutgoingProduct);
         })
-        .WithName("CreateOutgoing")
+        .WithName("CreateOutgoingEntry")
         .WithOpenApi();
 
         group.MapPut("/{id}", async Task<Results<Ok, NotFound>> (long id, OutgoingProductVM appData, ApplicationContext db) =>
         {
+            var preOutgoing = await db.Outgoings.FindAsync(id);
+            var product = await db.Products.FindAsync(appData.OutgoingProductId);
+
             var affected = await db.Outgoings
                 .Where(model => model.Id == id)
                 .ExecuteUpdateAsync(setters => setters
                   .SetProperty(m => m.OutgoingProductId, appData.OutgoingProductId)
                   .SetProperty(m => m.Quantity, appData.Quantity)
+                  .SetProperty(m => m.TotalPrice, appData.Quantity * product.Price)
+                  .SetProperty(m => m.LastUpdated, DateTime.UtcNow)
                 );
+
+            int diffQuantity = preOutgoing.Quantity - appData.Quantity;
+            product.StockCount += diffQuantity;
+            product.LastUpdated = DateTime.UtcNow;
+
+            await db.SaveChangesAsync();
 
             return affected == 1 ? TypedResults.Ok() : TypedResults.NotFound();
         })
-        .WithName("UpdateOutgoing")
+        .WithName("UpdateOutgoingEntry")
+        .WithOpenApi();
+
+        group.MapGet("/List", async (ApplicationContext db) =>
+        {
+            var outgoingList = await db.Outgoings.Select(o => new OutgoingListVM
+            {
+                Id = o.Id,
+                Quantity = o.Quantity,
+                ProductName = $"{o.Product.Brand} {o.Product.Name} {o.Product.VariantName} ({o.Product.Measurement})",
+                ProductPrice = o.ProductPrice,
+                TotalPrice = o.TotalPrice,
+                DateTimeOutgoing = o.DateTimeOutgoing,
+                LastUpdated = o.LastUpdated
+            }).ToListAsync();
+
+            return outgoingList;
+        })
+        .WithName("GetOutgoingList")
         .WithOpenApi();
 
         group.MapGet("/", async (ApplicationContext db) =>
@@ -64,7 +99,7 @@ public static class OutgoingController
                     ? TypedResults.Ok(model)
                     : TypedResults.NotFound();
         })
-        .WithName("GetOutgoingById")
+        .WithName("GetOutgoingProductById")
         .WithOpenApi();
 
         group.MapDelete("/{id}", async Task<Results<Ok, NotFound>> (long id, ApplicationContext db) =>
@@ -75,7 +110,7 @@ public static class OutgoingController
 
             return affected == 1 ? TypedResults.Ok() : TypedResults.NotFound();
         })
-        .WithName("DeleteOutgoing")
+        .WithName("DeleteOutgoingEntry")
         .WithOpenApi();
     }
 }

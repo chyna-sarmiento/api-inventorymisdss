@@ -18,6 +18,7 @@ namespace api_inventorymisdss.Domain
             IncomingProductId = incomingProductId;
             IncomingStockQuantity = incomingStockQuantity;
             DateTimeRestock = DateTime.UtcNow;
+            LastUpdated = DateTimeRestock;
         }
     }
 }
