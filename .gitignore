@@ -1,0 +1,34 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+# Visual Studio files
+.vs/
+*.user
+*.suo
+*.cache
+*.dll
+*.exe
+
+# Build results
+bin/
+obj/
+
+# NuGet packages
+*.nupkg
+packages/
+
+# Node.js dependencies
+node_modules/
+
+# Logs and databases
+*.log
+*.sqlite
+*.mdf
+*.ldf
+
+# ReSharper files
+_ReSharper*
+
+# Test results
+TestResults/
