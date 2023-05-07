@@ -33,7 +33,9 @@ _ReSharper*
 # Test results
 *.vsidx
 TestResults/
+
 /api-inventorymisdss/.vs/api-inventorymisdss/DesignTimeBuild
+/api-inventorymisdss/.vs/api-inventorymisdss/FileContentIndex
 
 ### ASPNETCore ###
 ## Ignore Visual Studio temporary files, build results, and
