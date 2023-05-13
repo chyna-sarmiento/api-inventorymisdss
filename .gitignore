@@ -33,7 +33,9 @@ _ReSharper*
 # Test results
 *.vsidx
 TestResults/
+
 /api-inventorymisdss/.vs/api-inventorymisdss/DesignTimeBuild
+/api-inventorymisdss/.vs/api-inventorymisdss/FileContentIndex
 
 ### ASPNETCore ###
 ## Ignore Visual Studio temporary files, build results, and
@@ -311,4 +313,3 @@ obj/
 # Common node modules locations
 /node_modules
 /wwwroot/node_modules
-/api-inventorymisdss/.vs/api-inventorymisdss/DesignTimeBuild/.dtbcache.v2
