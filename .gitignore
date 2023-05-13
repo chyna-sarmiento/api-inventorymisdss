@@ -311,3 +311,4 @@ obj/
 # Common node modules locations
 /node_modules
 /wwwroot/node_modules
+/api-inventorymisdss/.vs/api-inventorymisdss/DesignTimeBuild/.dtbcache.v2
