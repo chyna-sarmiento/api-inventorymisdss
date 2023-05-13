@@ -1,0 +1,26 @@
+version: "3.9"
+services:
+  postgres:
+    container_name: pg_container_cs
+    image: postgres
+    ports:
+      - "5432:8000"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: e49oqg76
+      POSTGRES_DB: InventorymisdssDB
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  api:
+    image: apiinventorymisdss:dev
+    ports:
+      - "80:8000"
+    depends_on:
+      - postgres
+    tty: true
+
+volumes:
+  pgdata:
