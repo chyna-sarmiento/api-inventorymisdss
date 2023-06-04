@@ -61,7 +61,9 @@ public static class ProductsController
             var productList = await db.Products.Select(p => new ProductListVM
             {
                 Id = p.Id,
-                DisplayName = $"{p.Brand} {p.Name} {p.VariantName} ({p.Measurement})",
+                DisplayName = string.IsNullOrEmpty(p.Measurement)
+                ? $"{p.Brand} {p.Name} {p.VariantName}".Trim()
+                : $"{p.Brand} {p.Name} {p.VariantName} ({p.Measurement})".Trim(),
                 StockCount = p.StockCount
             }).ToListAsync();
 
