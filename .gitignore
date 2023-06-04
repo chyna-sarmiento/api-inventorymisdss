@@ -313,3 +313,5 @@ obj/
 # Common node modules locations
 /node_modules
 /wwwroot/node_modules
+/api-inventorymisdss/SecretKey.cs
+/api-inventorymisdss/appsettings.json
