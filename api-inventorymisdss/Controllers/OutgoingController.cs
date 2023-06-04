@@ -12,31 +12,50 @@ public static class OutgoingController
     {
         var group = routes.MapGroup("/api/Outgoing").WithTags(nameof(Outgoing));
 
-        group.MapPost("/", async (OutgoingProductVM appData, ApplicationContext db) =>
+        group.MapPost("/", async (List<OutgoingProductVM> appDataList, ApplicationContext db) =>
         {
-            var product = await db.Products.FindAsync(appData.OutgoingProductId);
+            var createdOutgoings = new List<Outgoing>();
 
-            //if (product == null)
-            //{
-            //    TypedResults.NotFound(appData.OutgoingProductId);
-            //}
-
-            var OutgoingProduct = new Outgoing(appData.OutgoingProductId, appData.Quantity)
+            foreach (var appData in appDataList)
             {
-                ProductPrice = product.Price
-            };
+                var product = await db.Products.FindAsync(appData.OutgoingProductId);
 
-            if (product.StockCount >= appData.Quantity)
-            {
-                OutgoingProduct.TotalPrice = appData.Quantity * product.Price;
+                if (product != null)
+                {
+                    var outgoingProduct = new Outgoing(appData.OutgoingProductId, appData.Quantity, appData.DateTimeOutgoing)
+                    {
+                        ProductPrice = product.Price
+                    };
 
-                product.StockCount -= appData.Quantity;
-                product.LastUpdated = DateTime.UtcNow;
+                    if (product.StockCount >= appData.Quantity)
+                    {
+                        outgoingProduct.TotalPrice = appData.Quantity * product.Price;
+
+                        product.StockCount -= appData.Quantity;
+                        product.LastUpdated = DateTime.UtcNow;
+                    }
+
+                    if (appData.DateTimeOutgoing != DateTime.MinValue)
+                    {
+                        outgoingProduct.DateTimeOutgoing = appData.DateTimeOutgoing;
+                    }
+                    else
+                    {
+                        outgoingProduct.DateTimeOutgoing = DateTime.UtcNow;
+                    }
+
+                    db.Outgoings.Add(outgoingProduct);
+                    createdOutgoings.Add(outgoingProduct);
+                }
             }
 
-            db.Outgoings.Add(OutgoingProduct);
             await db.SaveChangesAsync();
-            return TypedResults.Created($"/api/Outgoing/{OutgoingProduct.Id}", OutgoingProduct);
+
+            //if (createdOutgoings.Count > 0)
+            //{
+            //    return TypedResults.Created($"/api/Outgoing/{createdOutgoings[0].Id}", createdOutgoings);
+            //}
+            //return TypedResults.NotFound();
         })
         .WithName("CreateOutgoingEntry")
         .WithOpenApi();
@@ -51,7 +70,9 @@ public static class OutgoingController
                 .ExecuteUpdateAsync(setters => setters
                   .SetProperty(m => m.OutgoingProductId, appData.OutgoingProductId)
                   .SetProperty(m => m.Quantity, appData.Quantity)
+                  .SetProperty(m => m.ProductPrice, product.Price)
                   .SetProperty(m => m.TotalPrice, appData.Quantity * product.Price)
+                  .SetProperty(m => m.DateTimeOutgoing, appData.DateTimeOutgoing)
                   .SetProperty(m => m.LastUpdated, DateTime.UtcNow)
                 );
 

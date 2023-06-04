@@ -6,6 +6,7 @@ using api_inventorymisdss.ViewModels;
 using System.Text.Json;
 using Newtonsoft.Json;
 using System.Net;
+using Microsoft.AspNetCore.Mvc;
 
 namespace api_inventorymisdss.Controllers;
 
@@ -35,8 +36,8 @@ public static class ProductsController
         .WithName("CreateProduct")
         .WithOpenApi();
 
-        group.MapPut("/{id}", async Task<Results<Ok, NotFound>> (long id, ProductVM appData, ApplicationContext db) =>
-        {
+        group.MapPut("/{id}", async Task<Results<Ok, NotFound>> ([FromRoute] long id, [FromBody] ProductVM appData, ApplicationContext db) =>
+            {
             var affected = await db.Products
                 .Where(model => model.Id == id)
                 .ExecuteUpdateAsync(setters => setters
@@ -60,7 +61,8 @@ public static class ProductsController
             var productList = await db.Products.Select(p => new ProductListVM
             {
                 Id = p.Id,
-                DisplayName = $"{p.Brand} {p.Name} {p.VariantName} ({p.Measurement})"
+                DisplayName = $"{p.Brand} {p.Name} {p.VariantName} ({p.Measurement})",
+                StockCount = p.StockCount
             }).ToListAsync();
 
             return productList;

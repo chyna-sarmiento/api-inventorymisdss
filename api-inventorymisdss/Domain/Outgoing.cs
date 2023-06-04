@@ -15,12 +15,12 @@ namespace api_inventorymisdss.Domain
         public Product Product { get; set; }
         public long OutgoingProductId { get; set; }
 
-        public Outgoing(long outgoingProductId, int quantity)
+        public Outgoing(long outgoingProductId, int quantity, DateTime dateTimeOutgoing)
         {
             OutgoingProductId = outgoingProductId;
             Quantity = quantity;
-            DateTimeOutgoing = DateTime.UtcNow;
-            LastUpdated = DateTimeOutgoing;
+            DateTimeOutgoing = dateTimeOutgoing;
+            LastUpdated = DateTime.UtcNow;
         }   
     }
 }

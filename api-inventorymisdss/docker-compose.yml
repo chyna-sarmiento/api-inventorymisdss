@@ -1,26 +1,45 @@
-version: "3.9"
-services:
-  postgres:
-    container_name: pg_container_cs
-    image: postgres
-    ports:
-      - "5432:8000"
-    environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: e49oqg76
-      POSTGRES_DB: InventorymisdssDB
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+#version: "3.9"
+#services:
+#  postgres:
+#    container_name: pg_container_cs
+#    image: postgres
+#    ports:
+#      - "5432:8000"
+#    environment:
+#      POSTGRES_USER: admin
+#      POSTGRES_PASSWORD: e49oqg76
+#      POSTGRES_DB: InventorymisdssDB
+#    volumes:
+#      - pgdata:/var/lib/postgresql/data
+#    extra_hosts:
+#      - "host.docker.internal:host-gateway"
 
-  api:
-    image: apiinventorymisdss:dev
+#  api:
+#    image: apiinventorymisdss:dev
+#    ports:
+#      - "80:8000"
+#    depends_on:
+#      - postgres
+#    tty: true
+
+#volumes:
+#  pgdata:
+
+version: "3.9"
+
+services:
+  inventorymisdss-postgres:
+    image: postgres:13-alpine
+    container_name: inventorymisdss-postgres
+    environment:
+      - POSTGRES_DATABASE=devInventorymisdss
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
     ports:
-      - "80:8000"
-    depends_on:
-      - postgres
-    tty: true
+      - 5432:5432
+    volumes:
+      - postgres-inventorymisdss-data:/data/db
+    restart: on-failure
 
 volumes:
-  pgdata:
+  postgres-inventorymisdss-data:
