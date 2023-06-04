@@ -105,6 +105,25 @@ public static class OutgoingController
         .WithName("GetOutgoingList")
         .WithOpenApi();
 
+        group.MapGet("/ForecastData", async (ApplicationContext db) =>
+        {
+            var outgoingDemand = await db.Outgoings
+            .GroupBy(o => o.OutgoingProductId)
+            .Select(g => new OutgoingForecastVM
+            {
+                OutgoingProductId = g.Key,
+                ProductName = string.IsNullOrEmpty(g.First().Product.Measurement)
+                ? $"{g.First().Product.Brand} {g.First().Product.Name} {g.First().Product.VariantName}".Trim()
+                : $"{g.First().Product.Brand} {g.First().Product.Name} {g.First().Product.VariantName} ({g.First().Product.Measurement})".Trim(),
+                OutgoingDemandVolume = g.Count()
+            })
+        .ToListAsync();
+
+            return outgoingDemand;
+        })
+        .WithName("GetOutgoingForecastData")
+        .WithOpenApi();
+
         group.MapGet("/", async (ApplicationContext db) =>
         {
             return await db.Outgoings.ToListAsync();
