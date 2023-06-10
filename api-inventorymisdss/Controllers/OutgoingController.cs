@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using api_inventorymisdss.Domain;
 using api_inventorymisdss.Repository;
 using api_inventorymisdss.ViewModels;
+using System.Globalization;
 
 namespace api_inventorymisdss.Controllers;
 
@@ -89,11 +90,16 @@ public static class OutgoingController
 
         group.MapGet("/List", async (ApplicationContext db) =>
         {
-            var outgoingList = await db.Outgoings.Select(o => new OutgoingListVM
+            var outgoingList = await db.Outgoings
+            .OrderBy(o => o.Id)
+            .Select(o => new OutgoingListVM
             {
                 Id = o.Id,
                 Quantity = o.Quantity,
-                ProductName = $"{o.Product.Brand} {o.Product.Name} {o.Product.VariantName} ({o.Product.Measurement})",
+                OutgoingProductId = o.OutgoingProductId,
+                ProductName = string.IsNullOrEmpty(o.Product.Measurement)
+                ? $"{o.Product.Brand} {o.Product.Name} {o.Product.VariantName}".Trim()
+                : $"{o.Product.Brand} {o.Product.Name} {o.Product.VariantName} ({o.Product.Measurement})".Trim(),
                 ProductPrice = o.ProductPrice,
                 TotalPrice = o.TotalPrice,
                 DateTimeOutgoing = o.DateTimeOutgoing,
@@ -103,25 +109,6 @@ public static class OutgoingController
             return outgoingList;
         })
         .WithName("GetOutgoingList")
-        .WithOpenApi();
-
-        group.MapGet("/ForecastData", async (ApplicationContext db) =>
-        {
-            var outgoingDemand = await db.Outgoings
-            .GroupBy(o => o.OutgoingProductId)
-            .Select(g => new OutgoingForecastVM
-            {
-                OutgoingProductId = g.Key,
-                ProductName = string.IsNullOrEmpty(g.First().Product.Measurement)
-                ? $"{g.First().Product.Brand} {g.First().Product.Name} {g.First().Product.VariantName}".Trim()
-                : $"{g.First().Product.Brand} {g.First().Product.Name} {g.First().Product.VariantName} ({g.First().Product.Measurement})".Trim(),
-                OutgoingDemandVolume = g.Count()
-            })
-        .ToListAsync();
-
-            return outgoingDemand;
-        })
-        .WithName("GetOutgoingForecastData")
         .WithOpenApi();
 
         group.MapGet("/", async (ApplicationContext db) =>
@@ -152,5 +139,132 @@ public static class OutgoingController
         })
         .WithName("DeleteOutgoingEntry")
         .WithOpenApi();
+
+        #region Forecast Data
+        group.MapGet("/ForecastData", async (ApplicationContext db) =>
+        {
+            var outgoingDemand = await db.Outgoings
+            .GroupBy(o => o.OutgoingProductId)
+            .Select(g => new OutgoingMonthlyForecastVM
+            {
+                OutgoingProductId = g.Key,
+                ProductName = string.IsNullOrEmpty(g.First().Product.Measurement)
+                ? $"{g.First().Product.Brand} {g.First().Product.Name} {g.First().Product.VariantName}".Trim()
+                : $"{g.First().Product.Brand} {g.First().Product.Name} {g.First().Product.VariantName} ({g.First().Product.Measurement})".Trim(),
+                OutgoingDemandVolume = g.Count()
+            })
+        .ToListAsync();
+
+            return outgoingDemand;
+        })
+        .WithName("GetOutgoingForecastData")
+        .WithOpenApi();
+
+        group.MapGet("/MonthlyForecastData", async (ApplicationContext db) =>
+        {
+            var outgoingMonthlyDemand = await db.Outgoings
+            .GroupBy(o => new { o.OutgoingProductId, o.DateTimeOutgoing.Year, o.DateTimeOutgoing.Month})
+            .Select(g => new OutgoingMonthlyForecastVM
+            {
+                OutgoingYear = g.Key.Year,
+                OutgoingMonth = g.Key.Month,
+                OutgoingProductId = g.Key.OutgoingProductId,
+                ProductName = string.IsNullOrEmpty(g.First().Product.Measurement)
+                ? $"{g.First().Product.Brand} {g.First().Product.Name} {g.First().Product.VariantName}".Trim()
+                : $"{g.First().Product.Brand} {g.First().Product.Name} {g.First().Product.VariantName} ({g.First().Product.Measurement})".Trim(),
+
+                OutgoingDemandVolume = g.Sum(o => o.Quantity)
+            }).ToListAsync();
+
+            return outgoingMonthlyDemand;
+        })
+        .WithName("GetListOutgoingMonthlyData")
+        .WithOpenApi();
+
+        group.MapGet("/MonthlyForecastData/{year}/{month}", async (ApplicationContext db, int year, int month) =>
+        {
+            var outgoingMonthlyDemand = await db.Outgoings
+            .GroupBy(o => new { o.OutgoingProductId, o.DateTimeOutgoing.Year, o.DateTimeOutgoing.Month})
+            .Where(g => g.Key.Month == month && g.Key.Year == year)
+            .Select(g => new OutgoingMonthlyForecastVM
+            {
+                OutgoingYear = g.Key.Year,
+                OutgoingMonth = g.Key.Month,
+                OutgoingProductId = g.Key.OutgoingProductId,
+                ProductName = string.IsNullOrEmpty(g.First().Product.Measurement)
+                ? $"{g.First().Product.Brand} {g.First().Product.Name} {g.First().Product.VariantName}".Trim()
+                : $"{g.First().Product.Brand} {g.First().Product.Name} {g.First().Product.VariantName} ({g.First().Product.Measurement})".Trim(),
+
+                OutgoingDemandVolume = g.Sum(o => o.Quantity)
+            }).ToListAsync();
+
+            return outgoingMonthlyDemand;
+        })
+        .WithName("GetDataOutgoingMonth")
+        .WithOpenApi();
+
+        group.MapGet("/WeeklyForecastData", async (ApplicationContext db) =>
+        {
+            var outgoingData = await db.Outgoings
+            .Select(o => new
+            {
+                o.OutgoingProductId,
+                o.Quantity,
+                o.DateTimeOutgoing.Year,
+                o.DateTimeOutgoing,
+                o.Product
+            })
+            .ToListAsync();
+
+            var outgoingWeeklyDemand = outgoingData
+            .GroupBy(o => new { o.OutgoingProductId, o.Year, Week = ISOWeek.GetWeekOfYear(o.DateTimeOutgoing) })
+            .Select(g => new OutgoingWeeklyForecastVM
+            {
+                OutgoingYear = g.Key.Year,
+                OutgoingWeek = g.Key.Week,
+                OutgoingProductId = g.Key.OutgoingProductId,
+                ProductName = string.IsNullOrEmpty(g.First().Product.Measurement)
+                ? $"{g.First().Product.Brand} {g.First().Product.Name} {g.First().Product.VariantName}".Trim()
+                : $"{g.First().Product.Brand} {g.First().Product.Name} {g.First().Product.VariantName} ({g.First().Product.Measurement})".Trim(),
+                OutgoingDemandVolume = g.Sum(o => o.Quantity)
+            }).ToList();
+
+            return outgoingWeeklyDemand;
+        })
+        .WithName("GetListOutgoingWeeklyData")
+        .WithOpenApi();
+
+        group.MapGet("/WeeklyForecastData/{year}/{week}", async (ApplicationContext db, int year, int week) =>
+        {
+            var outgoingData = await db.Outgoings
+            .Select(o => new
+            {
+                o.OutgoingProductId,
+                o.Quantity,
+                o.DateTimeOutgoing.Year,
+                o.DateTimeOutgoing,
+                o.Product
+            })
+            .ToListAsync();
+
+            var outgoingWeeklyDemand = outgoingData
+            .GroupBy(o => new { o.OutgoingProductId, o.Year, Week = ISOWeek.GetWeekOfYear(o.DateTimeOutgoing)})
+            .Where(g => g.Key.Week == week && g.Key.Year == year)
+            .Select(g => new OutgoingWeeklyForecastVM
+            {
+                OutgoingYear = g.Key.Year,
+                OutgoingWeek = g.Key.Week,
+                OutgoingProductId = g.Key.OutgoingProductId,
+                ProductName = string.IsNullOrEmpty(g.First().Product.Measurement)
+                ? $"{g.First().Product.Brand} {g.First().Product.Name} {g.First().Product.VariantName}".Trim()
+                : $"{g.First().Product.Brand} {g.First().Product.Name} {g.First().Product.VariantName} ({g.First().Product.Measurement})".Trim(),
+                OutgoingDemandVolume = g.Sum(o => o.Quantity)
+            }).ToList();
+
+            return outgoingWeeklyDemand;
+        })
+        .WithName("GetDataOutgoingWeek")
+        .WithOpenApi(); 
+        #endregion
     }
 }
