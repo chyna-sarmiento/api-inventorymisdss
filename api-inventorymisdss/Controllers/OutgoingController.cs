@@ -111,6 +111,13 @@ public static class OutgoingController
         .WithName("GetOutgoingList")
         .WithOpenApi();
 
+        group.MapGet("/NumberOfEntries", async (ApplicationContext db) =>
+        {
+            return await db.Outgoings.CountAsync();
+        })
+        .WithName("GetOutgoingNumberOfEntries")
+        .WithOpenApi();
+
         group.MapGet("/", async (ApplicationContext db) =>
         {
             return await db.Outgoings.ToListAsync();

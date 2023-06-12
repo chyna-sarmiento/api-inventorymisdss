@@ -72,6 +72,13 @@ public static class ProductsController
         .WithName("GetProductList")
         .WithOpenApi();
 
+        group.MapGet("/NumberOfProducts", async (ApplicationContext db) =>
+        {
+            return await db.Products.CountAsync();
+        })
+        .WithName("GetNumberOfProducts")
+        .WithOpenApi();
+
         group.MapGet("/", async (ApplicationContext db) =>
             {
                 return await db.Products.ToListAsync();
