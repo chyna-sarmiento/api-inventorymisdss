@@ -28,13 +28,13 @@ public static class OutgoingController
                         ProductPrice = product.Price
                     };
 
-                    if (product.StockCount >= appData.Quantity)
-                    {
+                    //if (product.StockCount >= appData.Quantity)
+                    //{
                         outgoingProduct.TotalPrice = appData.Quantity * product.Price;
 
                         product.StockCount -= appData.Quantity;
                         product.LastUpdated = DateTime.UtcNow;
-                    }
+                    //}
 
                     if (appData.DateTimeOutgoing != DateTime.MinValue)
                     {
@@ -172,7 +172,6 @@ public static class OutgoingController
                 ProductName = string.IsNullOrEmpty(g.First().Product.Measurement)
                 ? $"{g.First().Product.Brand} {g.First().Product.Name} {g.First().Product.VariantName}".Trim()
                 : $"{g.First().Product.Brand} {g.First().Product.Name} {g.First().Product.VariantName} ({g.First().Product.Measurement})".Trim(),
-
                 OutgoingDemandVolume = g.Sum(o => o.Quantity)
             }).ToListAsync();
 
@@ -264,7 +263,46 @@ public static class OutgoingController
             return outgoingWeeklyDemand;
         })
         .WithName("GetDataOutgoingWeek")
-        .WithOpenApi(); 
+        .WithOpenApi();
+
+        group.MapGet("/DailyForecastData", async (ApplicationContext db) =>
+        {
+            var outgoingDailyDemand = await db.Outgoings
+            .GroupBy(o => new { o.OutgoingProductId, o.DateTimeOutgoing.Date })
+            .Select(g => new OutgoingDailyForecastVM
+            {
+                OutgoingDate = g.Key.Date,
+                OutgoingProductId = g.Key.OutgoingProductId,
+                ProductName = string.IsNullOrEmpty(g.First().Product.Measurement)
+                ? $"{g.First().Product.Brand} {g.First().Product.Name} {g.First().Product.VariantName}".Trim()
+                : $"{g.First().Product.Brand} {g.First().Product.Name} {g.First().Product.VariantName} ({g.First().Product.Measurement})".Trim(),
+                OutgoingDemandVolume = g.Sum(o => o.Quantity)
+            }).ToListAsync();
+
+            return outgoingDailyDemand;
+        })
+        .WithName("GetListOutgoingDailyData")
+        .WithOpenApi();
+
+        group.MapGet("/DailyForecastData/{date}", async (ApplicationContext db, DateTime date) =>
+        {
+            var outgoingDailyDemand = await db.Outgoings
+            .Where(o => o.DateTimeOutgoing.Date == date.Date)
+            .GroupBy(o => new { o.OutgoingProductId, o.DateTimeOutgoing.Date })
+            .Select(g => new OutgoingDailyForecastVM
+            {
+                OutgoingDate = g.Key.Date,
+                OutgoingProductId = g.Key.OutgoingProductId,
+                ProductName = string.IsNullOrEmpty(g.First().Product.Measurement)
+                ? $"{g.First().Product.Brand} {g.First().Product.Name} {g.First().Product.VariantName}".Trim()
+                : $"{g.First().Product.Brand} {g.First().Product.Name} {g.First().Product.VariantName} ({g.First().Product.Measurement})".Trim(),
+                OutgoingDemandVolume = g.Sum(o => o.Quantity)
+            }).ToListAsync();
+
+            return outgoingDailyDemand;
+        })
+        .WithName("GetOutgoingDay")
+        .WithOpenApi();
         #endregion
     }
 }
