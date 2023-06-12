@@ -79,9 +79,16 @@ public static class ProductsController
         .WithName("GetNumberOfProducts")
         .WithOpenApi();
 
-        group.MapGet("/", async (ApplicationContext db) =>
+        group.MapGet("/", async (ApplicationContext db, [FromQuery] int page, [FromQuery] int pageSize) =>
             {
-                return await db.Products.ToListAsync();
+                int skip = (page - 1) * pageSize;
+
+                var productList = await db.Products
+                .Skip(skip)
+                .Take(pageSize)
+                .ToListAsync();
+
+                return productList;
             })
             .WithName("GetAllProducts")
             .WithOpenApi();

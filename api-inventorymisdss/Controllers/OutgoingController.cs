@@ -4,6 +4,7 @@ using api_inventorymisdss.Domain;
 using api_inventorymisdss.Repository;
 using api_inventorymisdss.ViewModels;
 using System.Globalization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace api_inventorymisdss.Controllers;
 
@@ -88,10 +89,14 @@ public static class OutgoingController
         .WithName("UpdateOutgoingEntry")
         .WithOpenApi();
 
-        group.MapGet("/List", async (ApplicationContext db) =>
+        group.MapGet("/List", async (ApplicationContext db, [FromQuery] int page, [FromQuery] int pageSize) =>
         {
+            int skip = (page - 1) * pageSize;
+
             var outgoingList = await db.Outgoings
             .OrderBy(o => o.Id)
+            .Skip(skip)
+            .Take(pageSize)
             .Select(o => new OutgoingListVM
             {
                 Id = o.Id,
