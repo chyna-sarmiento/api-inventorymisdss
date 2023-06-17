@@ -93,7 +93,7 @@ public static class OutgoingController
         .WithName("UpdateOutgoingEntry")
         .WithOpenApi();
 
-        group.MapGet("/List", async (ApplicationContext db, [FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string searchValue) =>
+        group.MapGet("/List", async (ApplicationContext db, [FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string? searchValue) =>
         {
             var query = db.Outgoings.AsQueryable();
 
@@ -126,7 +126,7 @@ public static class OutgoingController
             int skip = (page - 1) * pageSize;
 
             var outgoingList = await query
-            .OrderBy(o => o.Id)
+            .OrderBy(o => o.DateTimeOutgoing)
             .Skip(skip)
             .Take(pageSize)
             .Select(o => new OutgoingListVM
@@ -157,7 +157,9 @@ public static class OutgoingController
 
         group.MapGet("/", async (ApplicationContext db) =>
         {
-            return await db.Outgoings.ToListAsync();
+            return await db.Outgoings
+            .OrderBy(o => o.DateTimeOutgoing)
+            .ToListAsync();
         })
         .WithName("GetAllOutgoings")
         .WithOpenApi();

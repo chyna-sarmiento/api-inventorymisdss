@@ -65,7 +65,9 @@ public static class ProductsController
                 ? $"{p.Brand} {p.Name} {p.VariantName}".Trim()
                 : $"{p.Brand} {p.Name} {p.VariantName} ({p.Measurement})".Trim(),
                 StockCount = p.StockCount
-            }).ToListAsync();
+            })
+            .OrderBy(p => p.DisplayName)
+            .ToListAsync();
 
             return productList;
         })
@@ -92,7 +94,6 @@ public static class ProductsController
         .WithName("GetProductListOfLowStocks")
         .WithOpenApi();
 
-
         group.MapGet("/NumberOfProducts", async (ApplicationContext db) =>
         {
             return await db.Products.CountAsync();
@@ -100,7 +101,7 @@ public static class ProductsController
         .WithName("GetNumberOfProducts")
         .WithOpenApi();
 
-        group.MapGet("/", async (ApplicationContext db, [FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string searchValue) =>
+        group.MapGet("/", async (ApplicationContext db, [FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string? searchValue) =>
             {
                 var query = db.Products.AsQueryable();
 
@@ -131,6 +132,7 @@ public static class ProductsController
                 int skip = (page - 1) * pageSize;
 
                 var productList = await query
+                .OrderBy(p => p.Brand)
                 .Skip(skip)
                 .Take(pageSize)
                 .ToListAsync();
