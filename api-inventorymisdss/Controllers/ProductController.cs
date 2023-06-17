@@ -75,7 +75,7 @@ public static class ProductsController
         group.MapGet("/ListLowStocks", async (ApplicationContext db, int threshold) =>
         {
             var productList = await db.Products
-            .Where(p => p.StockCount < threshold) // Filter for items with stock count less than the specified threshold
+            .Where(p => p.StockCount >= 0 && p.StockCount < threshold) // Filter for items with positive stock count less than the specified threshold
             .OrderBy(p => p.StockCount) // Order the items by stock count ascending
             .Select(p => new ProductListVM
             {

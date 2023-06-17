@@ -29,13 +29,17 @@ public static class OutgoingController
                         ProductPrice = product.Price
                     };
 
-                    //if (product.StockCount >= appData.Quantity)
-                    //{
-                        outgoingProduct.TotalPrice = appData.Quantity * product.Price;
-
+                    if (product.StockCount >= appData.Quantity)
+                    {
                         product.StockCount -= appData.Quantity;
-                        product.LastUpdated = DateTime.UtcNow;
-                    //}
+                    }
+                    else
+                    {
+                        product.StockCount = 0;
+                    }
+
+                    outgoingProduct.TotalPrice = appData.Quantity * product.Price;
+                    product.LastUpdated = DateTime.UtcNow;
 
                     if (appData.DateTimeOutgoing != DateTime.MinValue)
                     {
