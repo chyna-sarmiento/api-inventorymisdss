@@ -72,6 +72,27 @@ public static class ProductsController
         .WithName("GetProductList")
         .WithOpenApi();
 
+        group.MapGet("/ListLowStocks", async (ApplicationContext db, int threshold) =>
+        {
+            var productList = await db.Products
+            .Where(p => p.StockCount < threshold) // Filter for items with stock count less than the specified threshold
+            .OrderBy(p => p.StockCount) // Order the items by stock count ascending
+            .Select(p => new ProductListVM
+            {
+                Id = p.Id,
+                DisplayName = string.IsNullOrEmpty(p.Measurement)
+                ? $"{p.Brand} {p.Name} {p.VariantName}".Trim()
+                : $"{p.Brand} {p.Name} {p.VariantName} ({p.Measurement})".Trim(),
+                StockCount = p.StockCount
+            })
+            .ToListAsync();
+            
+            return productList;
+        })
+        .WithName("GetProductListOfLowStocks")
+        .WithOpenApi();
+
+
         group.MapGet("/NumberOfProducts", async (ApplicationContext db) =>
         {
             return await db.Products.CountAsync();
@@ -79,11 +100,37 @@ public static class ProductsController
         .WithName("GetNumberOfProducts")
         .WithOpenApi();
 
-        group.MapGet("/", async (ApplicationContext db, [FromQuery] int page, [FromQuery] int pageSize) =>
+        group.MapGet("/", async (ApplicationContext db, [FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string searchValue) =>
             {
+                var query = db.Products.AsQueryable();
+
+                if (!string.IsNullOrEmpty(searchValue))
+                {
+                    if (DateTime.TryParse(searchValue, out DateTime searchDate))
+                    {
+                        // Convert searchDate to UTC to match LastUpdated column
+                        searchDate = searchDate.ToUniversalTime();
+
+                        // Apply the search filter for LastUpdated column
+                        query = query.Where(p => p.LastUpdated.Equals(searchDate));
+                    }
+                    else
+                    {
+                        query = query.Where(p =>
+                            p.BarcodeId.Contains(searchValue) ||
+                            p.Brand.Contains(searchValue) ||
+                            p.Name.Contains(searchValue) ||
+                            p.VariantName.Contains(searchValue) ||
+                            p.Measurement.Contains(searchValue) ||
+                            p.Price.ToString().Contains(searchValue) ||
+                            p.StockCount.ToString().Contains(searchValue)
+                        );
+                    }
+                }
+
                 int skip = (page - 1) * pageSize;
 
-                var productList = await db.Products
+                var productList = await query
                 .Skip(skip)
                 .Take(pageSize)
                 .ToListAsync();

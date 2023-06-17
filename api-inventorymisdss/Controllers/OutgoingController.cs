@@ -89,11 +89,39 @@ public static class OutgoingController
         .WithName("UpdateOutgoingEntry")
         .WithOpenApi();
 
-        group.MapGet("/List", async (ApplicationContext db, [FromQuery] int page, [FromQuery] int pageSize) =>
+        group.MapGet("/List", async (ApplicationContext db, [FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string searchValue) =>
         {
+            var query = db.Outgoings.AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchValue))
+            {
+                if (DateTime.TryParse(searchValue, out DateTime searchDate))
+                {
+                    // Convert searchDate to UTC to match LastUpdated column
+                    searchDate = searchDate.ToUniversalTime();
+
+                    // Apply the search filter for LastUpdated column
+                    query = query.Where(o => o.DateTimeOutgoing.Equals(searchDate) || o.LastUpdated.Equals(searchDate));
+                }
+                else
+                {
+                    query = query.Where(o =>
+                    o.Id.ToString().Contains(searchValue) ||
+                    o.Quantity.ToString().Contains(searchValue) ||
+                    o.OutgoingProductId.ToString().Contains(searchValue) ||
+                    o.Product.Brand.Contains(searchValue) ||
+                    o.Product.Name.Contains(searchValue) ||
+                    o.Product.VariantName.Contains(searchValue) ||
+                    o.Product.Measurement.Contains(searchValue) ||
+                    o.ProductPrice.ToString().Contains(searchValue) ||
+                    o.TotalPrice.ToString().Contains(searchValue)
+                    );
+                }
+            }
+
             int skip = (page - 1) * pageSize;
 
-            var outgoingList = await db.Outgoings
+            var outgoingList = await query
             .OrderBy(o => o.Id)
             .Skip(skip)
             .Take(pageSize)
