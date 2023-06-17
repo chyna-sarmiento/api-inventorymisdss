@@ -184,6 +184,24 @@ public static class OutgoingController
         .WithName("DeleteOutgoingEntry")
         .WithOpenApi();
 
+        group.MapGet("/Outgoings/EarliestDate", async (ApplicationContext db) =>
+        {
+            var earliestDate = await db.Outgoings.MinAsync(o => o.DateTimeOutgoing); // Retrieve the earliest date
+
+            return earliestDate;
+        })
+        .WithName("GetOutgoingsEarliestDate")
+        .WithOpenApi();
+
+        group.MapGet("/Outgoings/LatestDate", async (ApplicationContext db) =>
+        {
+            var latestDate = await db.Outgoings.MaxAsync(o => o.DateTimeOutgoing); // Retrieve the latest date
+
+            return latestDate;
+        })
+        .WithName("GetOutgoingsLatestDate")
+        .WithOpenApi();
+
         #region Forecast Data
         group.MapGet("/ForecastData", async (ApplicationContext db) =>
         {
