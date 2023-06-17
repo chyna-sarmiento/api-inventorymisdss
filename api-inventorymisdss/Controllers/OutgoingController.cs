@@ -184,7 +184,7 @@ public static class OutgoingController
         .WithName("DeleteOutgoingEntry")
         .WithOpenApi();
 
-        group.MapGet("/Outgoings/EarliestDate", async (ApplicationContext db) =>
+        group.MapGet("/EarliestDate", async (ApplicationContext db) =>
         {
             var earliestDate = await db.Outgoings.MinAsync(o => o.DateTimeOutgoing); // Retrieve the earliest date
 
@@ -193,7 +193,7 @@ public static class OutgoingController
         .WithName("GetOutgoingsEarliestDate")
         .WithOpenApi();
 
-        group.MapGet("/Outgoings/LatestDate", async (ApplicationContext db) =>
+        group.MapGet("/LatestDate", async (ApplicationContext db) =>
         {
             var latestDate = await db.Outgoings.MaxAsync(o => o.DateTimeOutgoing); // Retrieve the latest date
 
