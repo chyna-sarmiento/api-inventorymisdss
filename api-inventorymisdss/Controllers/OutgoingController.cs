@@ -93,7 +93,7 @@ public static class OutgoingController
         .WithName("UpdateOutgoingEntry")
         .WithOpenApi();
 
-        group.MapGet("/List", async (ApplicationContext db, [FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string? searchValue) =>
+        group.MapGet("/List/{year}/{month}", async (ApplicationContext db, int year, int month, [FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string? searchValue) =>
         {
             var query = db.Outgoings.AsQueryable();
 
@@ -110,20 +110,21 @@ public static class OutgoingController
                 else
                 {
                     query = query.Where(o =>
-                    o.Quantity.ToString().Contains(searchValue) ||
-                    o.Product.Brand.Contains(searchValue) ||
-                    o.Product.Name.Contains(searchValue) ||
-                    o.Product.VariantName.Contains(searchValue) ||
-                    o.Product.Measurement.Contains(searchValue) ||
-                    o.ProductPrice.ToString().Contains(searchValue) ||
-                    o.TotalPrice.ToString().Contains(searchValue)
+                        o.Quantity.ToString().Contains(searchValue) ||
+                        o.Product.Brand.Contains(searchValue) ||
+                        o.Product.Name.Contains(searchValue) ||
+                        o.Product.VariantName.Contains(searchValue) ||
+                        o.Product.Measurement.Contains(searchValue) ||
+                        o.ProductPrice.ToString().Contains(searchValue) ||
+                        o.TotalPrice.ToString().Contains(searchValue)
                     );
                 }
             }
-
+            
             int skip = (page - 1) * pageSize;
 
             var outgoingList = await query
+            .Where(o => o.DateTimeOutgoing.Year == year && o.DateTimeOutgoing.Month == month)
             .OrderBy(o => o.DateTimeOutgoing)
             .Skip(skip)
             .Take(pageSize)
@@ -140,11 +141,12 @@ public static class OutgoingController
                 DateTimeOutgoing = o.DateTimeOutgoing,
                 LastUpdated = o.LastUpdated
             }).ToListAsync();
-
+            
             return outgoingList;
         })
         .WithName("GetOutgoingList")
         .WithOpenApi();
+
 
         group.MapGet("/NumberOfEntries", async (ApplicationContext db) =>
         {

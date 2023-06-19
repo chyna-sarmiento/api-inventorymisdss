@@ -12,6 +12,13 @@ namespace api_inventorymisdss.Controllers;
 
 public static class ProductsController
 {
+    private static int GetOverallDemand(ApplicationContext db, long productId)
+    {
+        return db.Outgoings
+            .Where(o => o.OutgoingProductId == productId)
+            .Sum(o => o.Quantity);
+    }
+
     public static void MapProductEndpoints(this IEndpointRouteBuilder routes)
     {
         var group = routes.MapGroup("/api/Product").WithTags(nameof(Product));
@@ -56,9 +63,10 @@ public static class ProductsController
         .WithName("UpdateProduct")
         .WithOpenApi();
 
-        group.MapGet("/List", async (ApplicationContext db) =>
+        group.MapGet("/List", async (ApplicationContext db, [FromQuery] string? searchValue) =>
         {
-            var productList = await db.Products.Select(p => new ProductListVM
+            var productList = await db.Products
+            .Select(p => new ProductListVM
             {
                 Id = p.Id,
                 DisplayName = string.IsNullOrEmpty(p.Measurement)
@@ -70,10 +78,22 @@ public static class ProductsController
 
             productList.Sort(new DisplayNameComparer());
 
+            if (!string.IsNullOrEmpty(searchValue))
+            {
+                productList = productList
+                    .Where(p => p.DisplayName.Contains(searchValue, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+
+            productList = productList
+                .Take(10)
+                .ToList();
+
             return productList;
         })
         .WithName("GetProductList")
         .WithOpenApi();
+
 
         group.MapGet("/ListLowStocks", async (ApplicationContext db, int threshold) =>
         {
