@@ -347,7 +347,7 @@ public static class OutgoingController
         .WithName("GetListOutgoingDailyData")
         .WithOpenApi();
 
-        group.MapGet("/DailyForecastData/{date}/{threshold}", async (ApplicationContext db, DateTime date, int threshold) =>
+        group.MapGet("/DailyForecastData/{date}", async (ApplicationContext db, DateTime date, [FromQuery] int? threshold) =>
         {
             var outgoingDailyDemand = await db.Outgoings
             .Where(o => o.DateTimeOutgoing.Date == date.Date)
