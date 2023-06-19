@@ -102,17 +102,15 @@ public static class OutgoingController
                 if (DateTime.TryParse(searchValue, out DateTime searchDate))
                 {
                     // Convert searchDate to UTC to match LastUpdated column
-                    searchDate = searchDate.ToUniversalTime();
+                    searchDate = searchDate.ToUniversalTime().Date;
 
                     // Apply the search filter for LastUpdated column
-                    query = query.Where(o => o.DateTimeOutgoing.Equals(searchDate) || o.LastUpdated.Equals(searchDate));
+                    query = query.Where(o => o.DateTimeOutgoing.Date.Equals(searchDate) || o.LastUpdated.Date.Equals(searchDate));
                 }
                 else
                 {
                     query = query.Where(o =>
-                    o.Id.ToString().Contains(searchValue) ||
                     o.Quantity.ToString().Contains(searchValue) ||
-                    o.OutgoingProductId.ToString().Contains(searchValue) ||
                     o.Product.Brand.Contains(searchValue) ||
                     o.Product.Name.Contains(searchValue) ||
                     o.Product.VariantName.Contains(searchValue) ||
@@ -126,29 +124,24 @@ public static class OutgoingController
             int skip = (page - 1) * pageSize;
 
             var outgoingList = await query
-        .ToListAsync();
-
-            outgoingList.Sort(new DateTimeOutgoingComparer());
-
-            var pagedOutgoingList = outgoingList
-        .Skip(skip)
-        .Take(pageSize)
-        .Select(o => new OutgoingListVM
-        {
-            Id = o.Id,
-            Quantity = o.Quantity,
-            OutgoingProductId = o.OutgoingProductId,
-            ProductName = string.IsNullOrEmpty(o.Product.Measurement)
+            .OrderBy(o => o.DateTimeOutgoing)
+            .Skip(skip)
+            .Take(pageSize)
+            .Select(o => new OutgoingListVM
+            {
+                Id = o.Id,
+                Quantity = o.Quantity,
+                OutgoingProductId = o.OutgoingProductId,
+                ProductName = string.IsNullOrEmpty(o.Product.Measurement)
                 ? $"{o.Product.Brand} {o.Product.Name} {o.Product.VariantName}".Trim()
                 : $"{o.Product.Brand} {o.Product.Name} {o.Product.VariantName} ({o.Product.Measurement})".Trim(),
-            ProductPrice = o.ProductPrice,
-            TotalPrice = o.TotalPrice,
-            DateTimeOutgoing = o.DateTimeOutgoing,
-            LastUpdated = o.LastUpdated
-        })
-        .ToList();
+                ProductPrice = o.ProductPrice,
+                TotalPrice = o.TotalPrice,
+                DateTimeOutgoing = o.DateTimeOutgoing,
+                LastUpdated = o.LastUpdated
+            }).ToListAsync();
 
-            return pagedOutgoingList;
+            return outgoingList;
         })
         .WithName("GetOutgoingList")
         .WithOpenApi();
