@@ -157,9 +157,10 @@ public static class OutgoingController
 
         group.MapGet("/", async (ApplicationContext db) =>
         {
-            return await db.Outgoings
-            .OrderBy(o => o.DateTimeOutgoing)
-            .ToListAsync();
+            var outgoings = await db.Outgoings.ToListAsync();
+            outgoings.Sort(new DateTimeOutgoingComparer());
+
+            return outgoings;
         })
         .WithName("GetAllOutgoings")
         .WithOpenApi();
@@ -368,5 +369,12 @@ public static class OutgoingController
         .WithName("GetOutgoingDay")
         .WithOpenApi();
         #endregion
+    }
+    public class DateTimeOutgoingComparer : IComparer<Outgoing>
+    {
+        public int Compare(Outgoing x, Outgoing y)
+        {
+            return DateTime.Compare(x.DateTimeOutgoing, y.DateTimeOutgoing);
+        }
     }
 }
