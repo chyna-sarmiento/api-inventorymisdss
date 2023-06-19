@@ -347,7 +347,7 @@ public static class OutgoingController
         .WithName("GetListOutgoingDailyData")
         .WithOpenApi();
 
-        group.MapGet("/DailyForecastData/{date}", async (ApplicationContext db, DateTime date) =>
+        group.MapGet("/DailyForecastData/{date}/{threshold}", async (ApplicationContext db, DateTime date, int threshold) =>
         {
             var outgoingDailyDemand = await db.Outgoings
             .Where(o => o.DateTimeOutgoing.Date == date.Date)
@@ -360,7 +360,9 @@ public static class OutgoingController
                 ? $"{g.First().Product.Brand} {g.First().Product.Name} {g.First().Product.VariantName}".Trim()
                 : $"{g.First().Product.Brand} {g.First().Product.Name} {g.First().Product.VariantName} ({g.First().Product.Measurement})".Trim(),
                 OutgoingDemandVolume = g.Sum(o => o.Quantity)
-            }).ToListAsync();
+            })
+            .Where(g => g.OutgoingDemandVolume >= threshold)
+            .ToListAsync();
 
             return outgoingDailyDemand;
         })
