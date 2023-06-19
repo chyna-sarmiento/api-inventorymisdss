@@ -66,8 +66,9 @@ public static class ProductsController
                 : $"{p.Brand} {p.Name} {p.VariantName} ({p.Measurement})".Trim(),
                 StockCount = p.StockCount
             })
-            .OrderBy(p => p.DisplayName)
             .ToListAsync();
+
+            productList.Sort(new DisplayNameComparer());
 
             return productList;
         })
@@ -163,5 +164,13 @@ public static class ProductsController
         })
         .WithName("DeleteProduct")
         .WithOpenApi();
+    }
+
+    public class DisplayNameComparer : IComparer<ProductListVM>
+    {
+        public int Compare(ProductListVM x, ProductListVM y)
+        {
+            return string.Compare(x.DisplayName, y.DisplayName, StringComparison.Ordinal);
+        }
     }
 }
