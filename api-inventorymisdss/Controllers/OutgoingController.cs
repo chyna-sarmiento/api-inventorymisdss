@@ -126,24 +126,29 @@ public static class OutgoingController
             int skip = (page - 1) * pageSize;
 
             var outgoingList = await query
-            .OrderBy(o => o.DateTimeOutgoing)
-            .Skip(skip)
-            .Take(pageSize)
-            .Select(o => new OutgoingListVM
-            {
-                Id = o.Id,
-                Quantity = o.Quantity,
-                OutgoingProductId = o.OutgoingProductId,
-                ProductName = string.IsNullOrEmpty(o.Product.Measurement)
+        .ToListAsync();
+
+            outgoingList.Sort(new DateTimeOutgoingComparer());
+
+            var pagedOutgoingList = outgoingList
+        .Skip(skip)
+        .Take(pageSize)
+        .Select(o => new OutgoingListVM
+        {
+            Id = o.Id,
+            Quantity = o.Quantity,
+            OutgoingProductId = o.OutgoingProductId,
+            ProductName = string.IsNullOrEmpty(o.Product.Measurement)
                 ? $"{o.Product.Brand} {o.Product.Name} {o.Product.VariantName}".Trim()
                 : $"{o.Product.Brand} {o.Product.Name} {o.Product.VariantName} ({o.Product.Measurement})".Trim(),
-                ProductPrice = o.ProductPrice,
-                TotalPrice = o.TotalPrice,
-                DateTimeOutgoing = o.DateTimeOutgoing,
-                LastUpdated = o.LastUpdated
-            }).ToListAsync();
+            ProductPrice = o.ProductPrice,
+            TotalPrice = o.TotalPrice,
+            DateTimeOutgoing = o.DateTimeOutgoing,
+            LastUpdated = o.LastUpdated
+        })
+        .ToList();
 
-            return outgoingList;
+            return pagedOutgoingList;
         })
         .WithName("GetOutgoingList")
         .WithOpenApi();
