@@ -3,9 +3,6 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using api_inventorymisdss.Domain;
 using api_inventorymisdss.Repository;
 using api_inventorymisdss.ViewModels;
-using System.Text.Json;
-using Newtonsoft.Json;
-using System.Net;
 using Microsoft.AspNetCore.Mvc;
 
 namespace api_inventorymisdss.Controllers;
@@ -84,10 +81,12 @@ public static class ProductsController
                     .Where(p => p.DisplayName.Contains(searchValue, StringComparison.OrdinalIgnoreCase))
                     .ToList();
             }
-
-            productList = productList
-                .Take(10)
-                .ToList();
+            else
+            {
+                productList = productList
+                    .Take(10)
+                    .ToList();
+            }
 
             return productList;
         })
