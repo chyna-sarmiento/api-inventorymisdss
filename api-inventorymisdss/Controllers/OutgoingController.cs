@@ -155,6 +155,16 @@ public static class OutgoingController
         .WithName("GetOutgoingNumberOfEntries")
         .WithOpenApi();
 
+        group.MapGet("/List/{year}/{month}/Count", async (ApplicationContext db, int year, int month) =>
+        {
+            var count = await db.Outgoings
+            .CountAsync(o => o.DateTimeOutgoing.Year == year && o.DateTimeOutgoing.Month == month);
+
+            return count;
+        })
+        .WithName("GetOutgoingMonthCount")
+        .WithOpenApi();
+
         group.MapGet("/", async (ApplicationContext db) =>
         {
             var outgoings = await db.Outgoings.ToListAsync();
