@@ -93,7 +93,7 @@ public static class OutgoingController
         .WithName("UpdateOutgoingEntry")
         .WithOpenApi();
 
-        group.MapGet("/ListDaily/{year}/{month}/{day}", async (ApplicationContext db, int year, int month, int day, [FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string? searchValue) =>
+        group.MapGet("/ListDailySummary/{year}/{month}/{day}", async (ApplicationContext db, int year, int month, int day, [FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string? searchValue) =>
         {
             var query = db.Outgoings.AsQueryable();
 
@@ -125,26 +125,39 @@ public static class OutgoingController
 
             var outgoingList = await query
             .Where(o => o.DateTimeOutgoing.Year == year && o.DateTimeOutgoing.Month == month && o.DateTimeOutgoing.Day == day)
-            .OrderBy(o => o.DateTimeOutgoing)
+            .GroupBy(o => o.OutgoingProductId)
+            .Select(g => new
+            {
+                OutgoingProductId = g.Key,
+                TotalQuantity = g.Sum(o => o.Quantity),
+                TotalPrice = g.Sum(o => o.TotalPrice)
+            })
+            .OrderBy(o => o.OutgoingProductId)
             .Skip(skip)
             .Take(pageSize)
+            .Join(db.Products, o => o.OutgoingProductId, p => p.Id, (o, p) => new OutgoingListVM
+            {
+                OutgoingProductId = o.OutgoingProductId,
+                ProductName = string.IsNullOrEmpty(p.Measurement)
+                ? $"{p.Brand} {p.Name} {p.VariantName}".Trim()
+                : $"{p.Brand} {p.Name} {p.VariantName} ({p.Measurement})".Trim(),
+                Quantity = o.TotalQuantity,
+                ProductPrice = p.Price, // Fill in the productPrice here
+                TotalPrice = o.TotalPrice
+            })
             .Select(o => new OutgoingListVM
             {
-                Id = o.Id,
-                Quantity = o.Quantity,
                 OutgoingProductId = o.OutgoingProductId,
-                ProductName = string.IsNullOrEmpty(o.Product.Measurement)
-                ? $"{o.Product.Brand} {o.Product.Name} {o.Product.VariantName}".Trim()
-                : $"{o.Product.Brand} {o.Product.Name} {o.Product.VariantName} ({o.Product.Measurement})".Trim(),
+                ProductName = o.ProductName,
+                Quantity = o.Quantity,
                 ProductPrice = o.ProductPrice,
-                TotalPrice = o.TotalPrice,
-                DateTimeOutgoing = o.DateTimeOutgoing,
-                LastUpdated = o.LastUpdated
-            }).ToListAsync();
+                TotalPrice = o.TotalPrice
+            })
+            .ToListAsync();
 
             return outgoingList;
         })
-        .WithName("GetOutgoingListDaily")
+        .WithName("GetOutgoingSummaryDaily")
         .WithOpenApi();
 
         group.MapGet("/ListMonthlySummary/{year}/{month}", async (ApplicationContext db, int year, int month, [FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string? searchValue) =>
@@ -214,6 +227,60 @@ public static class OutgoingController
         .WithName("GetOutgoingSummaryMonthly")
         .WithOpenApi();
 
+        group.MapGet("/ListDaily/{year}/{month}/{day}", async (ApplicationContext db, int year, int month, int day, [FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string? searchValue) =>
+        {
+            var query = db.Outgoings.AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchValue))
+            {
+                if (DateTime.TryParse(searchValue, out DateTime searchDate))
+                {
+                    // Convert searchDate to UTC to match LastUpdated column
+                    searchDate = searchDate.ToUniversalTime().Date;
+
+                    // Apply the search filter for LastUpdated column
+                    query = query.Where(o => o.DateTimeOutgoing.Date.Equals(searchDate) || o.LastUpdated.Date.Equals(searchDate));
+                }
+                else
+                {
+                    query = query.Where(o =>
+                        o.Quantity.ToString().Contains(searchValue) ||
+                        o.Product.Brand.Contains(searchValue) ||
+                        o.Product.Name.Contains(searchValue) ||
+                        o.Product.VariantName.Contains(searchValue) ||
+                        o.Product.Measurement.Contains(searchValue) ||
+                        o.ProductPrice.ToString().Contains(searchValue) ||
+                        o.TotalPrice.ToString().Contains(searchValue)
+                    );
+                }
+            }
+
+            int skip = (page - 1) * pageSize;
+
+            var outgoingList = await query
+            .Where(o => o.DateTimeOutgoing.Year == year && o.DateTimeOutgoing.Month == month && o.DateTimeOutgoing.Day == day)
+            .OrderBy(o => o.DateTimeOutgoing)
+            .Skip(skip)
+            .Take(pageSize)
+            .Select(o => new OutgoingListVM
+            {
+                Id = o.Id,
+                Quantity = o.Quantity,
+                OutgoingProductId = o.OutgoingProductId,
+                ProductName = string.IsNullOrEmpty(o.Product.Measurement)
+                ? $"{o.Product.Brand} {o.Product.Name} {o.Product.VariantName}".Trim()
+                : $"{o.Product.Brand} {o.Product.Name} {o.Product.VariantName} ({o.Product.Measurement})".Trim(),
+                ProductPrice = o.ProductPrice,
+                TotalPrice = o.TotalPrice,
+                DateTimeOutgoing = o.DateTimeOutgoing,
+                LastUpdated = o.LastUpdated
+            }).ToListAsync();
+
+            return outgoingList;
+        })
+        .WithName("GetOutgoingListDaily")
+        .WithOpenApi();
+
         group.MapGet("/ListMonthlyDetailed/{year}/{month}", async (ApplicationContext db, int year, int month, [FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string? searchValue) =>
         {
             var query = db.Outgoings.AsQueryable();
@@ -274,6 +341,20 @@ public static class OutgoingController
         })
         .WithName("GetOutgoingNumberOfEntries")
         .WithOpenApi();
+
+        group.MapGet("/ListDailySummary/{year}/{month}/{day}/Count", async (ApplicationContext db, int year, int month, int day) =>
+        {
+            var count = await db.Outgoings
+            .Where(o => o.DateTimeOutgoing.Year == year && o.DateTimeOutgoing.Month == month && o.DateTimeOutgoing.Day == day)
+            .Select(o => o.OutgoingProductId)
+            .Distinct()
+            .CountAsync();
+
+            return count;
+        })
+        .WithName("GetOutgoingSummaryDailyCount")
+        .WithOpenApi();
+
 
         group.MapGet("/List/{year}/{month}/Count", async (ApplicationContext db, int year, int month) =>
         {
