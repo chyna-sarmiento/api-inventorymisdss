@@ -355,15 +355,37 @@ public static class OutgoingController
         .WithName("GetOutgoingSummaryDailyCount")
         .WithOpenApi();
 
+        group.MapGet("/ListMonthlySummary/{year}/{month}/Count", async (ApplicationContext db, int year, int month) =>
+        {
+            var count = await db.Outgoings
+            .Where(o => o.DateTimeOutgoing.Year == year && o.DateTimeOutgoing.Month == month)
+            .Select(o => o.OutgoingProductId)
+            .Distinct()
+            .CountAsync();
 
-        group.MapGet("/List/{year}/{month}/Count", async (ApplicationContext db, int year, int month) =>
+            return count;
+        })
+        .WithName("GetOutgoingSummaryMonthlyCount")
+        .WithOpenApi();
+
+        group.MapGet("/ListDailyDetailed/{year}/{month}/{day}/Count", async (ApplicationContext db, int year, int month, int day) =>
+        {
+            var count = await db.Outgoings
+            .CountAsync(o => o.DateTimeOutgoing.Year == year && o.DateTimeOutgoing.Month == month && o.DateTimeOutgoing.Day == day);
+
+            return count;
+        })
+        .WithName("GetOutgoingDetailedDailyCount")
+        .WithOpenApi();
+
+        group.MapGet("/ListMonthlyDetailed/{year}/{month}/Count", async (ApplicationContext db, int year, int month) =>
         {
             var count = await db.Outgoings
             .CountAsync(o => o.DateTimeOutgoing.Year == year && o.DateTimeOutgoing.Month == month);
 
             return count;
         })
-        .WithName("GetOutgoingMonthCount")
+        .WithName("GetOutgoingDetailedMonthCount")
         .WithOpenApi();
 
         group.MapGet("/", async (ApplicationContext db) =>
