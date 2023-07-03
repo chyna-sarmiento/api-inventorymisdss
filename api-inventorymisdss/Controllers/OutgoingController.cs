@@ -93,7 +93,128 @@ public static class OutgoingController
         .WithName("UpdateOutgoingEntry")
         .WithOpenApi();
 
-        group.MapGet("/List/{year}/{month}", async (ApplicationContext db, int year, int month, [FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string? searchValue) =>
+        group.MapGet("/ListDaily/{year}/{month}/{day}", async (ApplicationContext db, int year, int month, int day, [FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string? searchValue) =>
+        {
+            var query = db.Outgoings.AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchValue))
+            {
+                if (DateTime.TryParse(searchValue, out DateTime searchDate))
+                {
+                    // Convert searchDate to UTC to match LastUpdated column
+                    searchDate = searchDate.ToUniversalTime().Date;
+
+                    // Apply the search filter for LastUpdated column
+                    query = query.Where(o => o.DateTimeOutgoing.Date.Equals(searchDate) || o.LastUpdated.Date.Equals(searchDate));
+                }
+                else
+                {
+                    query = query.Where(o =>
+                        o.Quantity.ToString().Contains(searchValue) ||
+                        o.Product.Brand.Contains(searchValue) ||
+                        o.Product.Name.Contains(searchValue) ||
+                        o.Product.VariantName.Contains(searchValue) ||
+                        o.Product.Measurement.Contains(searchValue) ||
+                        o.ProductPrice.ToString().Contains(searchValue) ||
+                        o.TotalPrice.ToString().Contains(searchValue)
+                    );
+                }
+            }
+
+            int skip = (page - 1) * pageSize;
+
+            var outgoingList = await query
+            .Where(o => o.DateTimeOutgoing.Year == year && o.DateTimeOutgoing.Month == month && o.DateTimeOutgoing.Day == day)
+            .OrderBy(o => o.DateTimeOutgoing)
+            .Skip(skip)
+            .Take(pageSize)
+            .Select(o => new OutgoingListVM
+            {
+                Id = o.Id,
+                Quantity = o.Quantity,
+                OutgoingProductId = o.OutgoingProductId,
+                ProductName = string.IsNullOrEmpty(o.Product.Measurement)
+                ? $"{o.Product.Brand} {o.Product.Name} {o.Product.VariantName}".Trim()
+                : $"{o.Product.Brand} {o.Product.Name} {o.Product.VariantName} ({o.Product.Measurement})".Trim(),
+                ProductPrice = o.ProductPrice,
+                TotalPrice = o.TotalPrice,
+                DateTimeOutgoing = o.DateTimeOutgoing,
+                LastUpdated = o.LastUpdated
+            }).ToListAsync();
+
+            return outgoingList;
+        })
+        .WithName("GetOutgoingListDaily")
+        .WithOpenApi();
+
+        group.MapGet("/ListMonthlySummary/{year}/{month}", async (ApplicationContext db, int year, int month, [FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string? searchValue) =>
+        {
+            var query = db.Outgoings.AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchValue))
+            {
+                if (DateTime.TryParse(searchValue, out DateTime searchDate))
+                {
+                    // Convert searchDate to UTC to match LastUpdated column
+                    searchDate = searchDate.ToUniversalTime().Date;
+
+                    // Apply the search filter for LastUpdated column
+                    query = query.Where(o => o.DateTimeOutgoing.Date.Equals(searchDate) || o.LastUpdated.Date.Equals(searchDate));
+                }
+                else
+                {
+                    query = query.Where(o =>
+                        o.Quantity.ToString().Contains(searchValue) ||
+                        o.Product.Brand.Contains(searchValue) ||
+                        o.Product.Name.Contains(searchValue) ||
+                        o.Product.VariantName.Contains(searchValue) ||
+                        o.Product.Measurement.Contains(searchValue) ||
+                        o.ProductPrice.ToString().Contains(searchValue) ||
+                        o.TotalPrice.ToString().Contains(searchValue)
+                    );
+                }
+            }
+
+            int skip = (page - 1) * pageSize;
+
+            var outgoingList = await query
+            .Where(o => o.DateTimeOutgoing.Year == year && o.DateTimeOutgoing.Month == month)
+            .GroupBy(o => o.OutgoingProductId)
+            .Select(g => new
+            {
+                OutgoingProductId = g.Key,
+                TotalQuantity = g.Sum(o => o.Quantity),
+                TotalPrice = g.Sum(o => o.TotalPrice)
+            })
+            .OrderBy(o => o.OutgoingProductId)
+            .Skip(skip)
+            .Take(pageSize)
+            .Join(db.Products, o => o.OutgoingProductId, p => p.Id, (o, p) => new OutgoingListVM
+            {
+                OutgoingProductId = o.OutgoingProductId,
+                ProductName = string.IsNullOrEmpty(p.Measurement)
+                ? $"{p.Brand} {p.Name} {p.VariantName}".Trim()
+                : $"{p.Brand} {p.Name} {p.VariantName} ({p.Measurement})".Trim(),
+                Quantity = o.TotalQuantity,
+                ProductPrice = p.Price, // Fill in the productPrice here
+                TotalPrice = o.TotalPrice
+            })
+            .Select(o => new OutgoingListVM
+            {
+                OutgoingProductId = o.OutgoingProductId,
+                ProductName = o.ProductName,
+                Quantity = o.Quantity,
+                ProductPrice = o.ProductPrice,
+                TotalPrice = o.TotalPrice
+            })
+            .ToListAsync();
+
+            return outgoingList;
+        })
+        .WithName("GetOutgoingSummaryMonthly")
+        .WithOpenApi();
+
+        group.MapGet("/ListMonthlyDetailed/{year}/{month}", async (ApplicationContext db, int year, int month, [FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string? searchValue) =>
         {
             var query = db.Outgoings.AsQueryable();
 
@@ -144,9 +265,8 @@ public static class OutgoingController
             
             return outgoingList;
         })
-        .WithName("GetOutgoingList")
+        .WithName("GetOutgoingDetailedMonthly")
         .WithOpenApi();
-
 
         group.MapGet("/NumberOfEntries", async (ApplicationContext db) =>
         {
@@ -380,6 +500,29 @@ public static class OutgoingController
         })
         .WithName("GetOutgoingDay")
         .WithOpenApi();
+
+        group.MapGet("/DailySalesData/{date}", async (ApplicationContext db, DateTime date) =>
+        {
+            var dailySales = await db.Outgoings
+            .Where(s => s.DateTimeOutgoing.Date == date.Date)
+            .SumAsync(s => s.TotalPrice);
+
+            return dailySales;
+        })
+        .WithName("GetDailySales")
+        .WithOpenApi();
+
+        group.MapGet("/MonthlySalesData/{year}/{month}", async (ApplicationContext db, int year, int month) =>
+        {
+            var monthlySales = await db.Outgoings
+            .Where(s => s.DateTimeOutgoing.Year == year && s.DateTimeOutgoing.Month == month)
+            .SumAsync(s => s.TotalPrice);
+
+            return monthlySales;
+        })
+        .WithName("GetMonthlySales")
+        .WithOpenApi();
+
         #endregion
     }
     public class DateTimeOutgoingComparer : IComparer<Outgoing>

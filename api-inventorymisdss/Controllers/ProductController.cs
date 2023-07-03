@@ -93,12 +93,11 @@ public static class ProductsController
         .WithName("GetProductList")
         .WithOpenApi();
 
-
         group.MapGet("/ListLowStocks", async (ApplicationContext db, int threshold) =>
         {
             var productList = await db.Products
-            .Where(p => p.StockCount >= 0 && p.StockCount < threshold) // Filter for items with positive stock count less than the specified threshold
-            .OrderBy(p => p.StockCount) // Order the items by stock count ascending
+            .Where(p => p.StockCount > 0 && p.StockCount < threshold)
+            .OrderBy(p => p.StockCount) //asc
             .Select(p => new ProductListVM
             {
                 Id = p.Id,
@@ -112,6 +111,48 @@ public static class ProductsController
             return productList;
         })
         .WithName("GetProductListOfLowStocks")
+        .WithOpenApi();
+
+        group.MapGet("/ListOutOfStock", async (ApplicationContext db) =>
+        {
+            var outOfStockProducts = await db.Products
+            .Where(p => p.StockCount == 0 || p.StockCount < 0)
+            .OrderByDescending(p => p.StockCount) //dsc
+            .Select(p => new ProductListVM
+            {
+                Id = p.Id,
+                DisplayName = string.IsNullOrEmpty(p.Measurement)
+                ? $"{p.Brand} {p.Name} {p.VariantName}".Trim()
+                : $"{p.Brand} {p.Name} {p.VariantName} ({p.Measurement})".Trim(),
+                StockCount = p.StockCount
+            })
+            .ToListAsync();
+            
+            return outOfStockProducts;
+        })
+        .WithName("ListOutOfStock")
+        .WithOpenApi();
+
+        group.MapGet("/CountLowStock", async (ApplicationContext db, int threshold) =>
+        {
+            var outOfStockCount = await db.Products
+            .Where(p => p.StockCount >= 0 && p.StockCount < threshold)
+            .CountAsync();
+
+            return outOfStockCount;
+        })
+        .WithName("CountLowStock")
+        .WithOpenApi();
+
+        group.MapGet("/CountOutOfStock", async (ApplicationContext db) =>
+        {
+            var outOfStockCount = await db.Products
+            .Where(p => p.StockCount == 0 || p.StockCount < 0)
+            .CountAsync();
+
+            return outOfStockCount;
+        })
+        .WithName("CountOutOfStock")
         .WithOpenApi();
 
         group.MapGet("/NumberOfProducts", async (ApplicationContext db) =>
