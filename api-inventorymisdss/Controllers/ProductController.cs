@@ -136,7 +136,7 @@ public static class ProductsController
         group.MapGet("/CountLowStock", async (ApplicationContext db, int threshold) =>
         {
             var outOfStockCount = await db.Products
-            .Where(p => p.StockCount >= 0 && p.StockCount < threshold)
+            .Where(p => p.StockCount > 0 && p.StockCount < threshold)
             .CountAsync();
 
             return outOfStockCount;
